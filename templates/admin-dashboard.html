@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Admin Dashboard | Excellence University</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+  <main class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-top">
+        <div class="admin-logo-block">
+          <img src="{{ url_for('static', filename='images/school-logo.png') }}" alt="Excellence University Logo"
+            class="admin-logo" />
+        </div>
+
+        <div class="admin-user-card">
+          <div class="admin-user-info-only">
+            <strong id="displayName">Loading...</strong>
+            <p id="displayRole">Loading...</p>
+          </div>
+        </div>
+
+        <nav class="admin-sidebar-nav" aria-label="Admin navigation">
+          <a href="#" class="active">Dashboard</a>
+          <a href="#">FAQ Management</a>
+          <a href="#">Response Templates</a>
+          <a href="#">Spam Reports</a>
+
+          <a href="{{ url_for('login') }}" class="admin-logout-link">
+            <span class="logout-icon">⇦</span>
+            <span>Log Out</span>
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+    <section class="admin-main" aria-labelledby="adminDashboardTitle">
+      <div class="admin-header">
+        <h1 id="adminDashboardTitle">Admin Dashboard</h1>
+      </div>
+
+      <div class="admin-summary-cards">
+        <div class="admin-summary-card">
+          <h3>Total FAQs</h3>
+          <strong>124</strong>
+          <span>Published knowledge entries</span>
+        </div>
+
+        <div class="admin-summary-card">
+          <h3>Templates</h3>
+          <strong>38</strong>
+          <span>Available response templates</span>
+        </div>
+
+        <div class="admin-summary-card">
+          <h3>Flagged Messages</h3>
+          <strong>12</strong>
+          <span>Require moderation review</span>
+        </div>
+      </div>
+
+      <div class="admin-search-bar">
+        <input type="search" placeholder="Search FAQ, template, or report" aria-label="Search administrative items" />
+      </div>
+
+      <div class="admin-panel">
+        <div class="admin-panel-header">
+          <h2>Recent Administrative Items</h2>
+        </div>
+
+        <div class="admin-item-list">
+          <article class="admin-item-card">
+            <div class="admin-item-top">
+              <div>
+                <h3>Password Reset FAQ</h3>
+                <p>Updated the self-service password reset steps for students.</p>
+              </div>
+
+              <span class="admin-status-badge updated">Updated</span>
+            </div>
+
+            <div class="admin-item-meta">
+              <span><strong>Category:</strong> FAQ</span>
+              <span><strong>Last Updated:</strong> Today</span>
+            </div>
+
+            <div class="admin-item-actions">
+              <button type="button" class="admin-primary-btn">Edit FAQ</button>
+              <button type="button" class="admin-secondary-btn">View Details</button>
+            </div>
+          </article>
+
+          <article class="admin-item-card">
+            <div class="admin-item-top">
+              <div>
+                <h3>Portal Access Template</h3>
+                <p>Template used when students cannot log in to the portal.</p>
+              </div>
+
+              <span class="admin-status-badge draft">Draft</span>
+            </div>
+
+            <div class="admin-item-meta">
+              <span><strong>Category:</strong> Template</span>
+              <span><strong>Last Updated:</strong> Yesterday</span>
+            </div>
+
+            <div class="admin-item-actions">
+              <button type="button" class="admin-primary-btn">Edit Template</button>
+              <button type="button" class="admin-secondary-btn">Preview</button>
+            </div>
+          </article>
+
+          <article class="admin-item-card">
+            <div class="admin-item-top">
+              <div>
+                <h3>Spam Keyword Report</h3>
+                <p>
+                  Flagged abusive or suspicious messages detected by the
+                  moderation rules.
+                </p>
+              </div>
+
+              <span class="admin-status-badge flagged">Flagged</span>
+            </div>
+
+            <div class="admin-item-meta">
+              <span><strong>Category:</strong> Moderation</span>
+              <span><strong>Last Updated:</strong> 2 days ago</span>
+            </div>
+
+            <div class="admin-item-actions">
+              <button type="button" class="admin-primary-btn">Review Report</button>
+              <button type="button" class="admin-secondary-btn">View Details</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="{{ url_for('static', filename='js/supabase-config.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='js/auth-guard.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/logout.js') }}"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      await guardDashboard("admin", "System Administrator");
+      bindLogout([".admin-logout-link"]);
+    });
+  </script>
+</body>
+
+</html>

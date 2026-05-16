@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support | Excellence University</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+  <div class="notice-bar">
+    <div class="container notice-inner">
+      <span class="notice-label">Notice</span>
+      <p>Applications, admissions updates, and student support services are available through our online portal and
+        virtual helpdesk.</p>
+      <button class="notice-close" aria-label="Close notice">×</button>
+    </div>
+  </div>
+  <header class="site-header">
+    <div class="top-row container">
+      <a href="{{ url_for('home') }}" class="brand">
+        <img src="{{ url_for('static', filename='images/school-logo.png') }}" alt="Excellence University Logo"
+          class="brand-logo" />
+        <div class="brand-text">
+          <strong>Excellence University</strong>
+          <span>Future-ready learning</span>
+        </div>
+      </a>
+
+      <div class="header-actions">
+        <a href="#">Students</a>
+        <a href="#">Alumni</a>
+        <a href="{{ url_for('login') }}" class="staff-cta">Staff</a>
+        <a href="{{ url_for('support') }}" class="header-cta">Support</a>
+
+        <button type="button" id="fontSizeToggle" class="accessibility-btn" aria-label="Toggle larger text">
+          <img src="{{ url_for('static', filename='images/zoom.png') }}" alt="" class="accessibility-icon" />
+        </button>
+
+        <button type="button" id="themeToggle" class="theme-toggle" aria-label="Toggle light and dark mode">
+          <span class="theme-icon">🌙</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <div class="container nav-inner">
+        <nav class="main-nav" aria-label="Main navigation">
+          <a href="{{ url_for('home') }}">Home</a>
+          <a href="#">About</a>
+          <a href="#">Admissions</a>
+          <a href="#">Programmes</a>
+          <a href="#">Research</a>
+          <a href="#">Student Life</a>
+          <a href="#">News &amp; Events</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="support-page">
+    <section class="support-hero">
+      <div class="container support-hero-content">
+        <div class="support-hero-copy">
+          <span class="hero-kicker">Support Services</span>
+          <h1>We’re here to help.</h1>
+          <p>
+            Get assistance for student portal access, password reset, Wi-Fi issues,
+            timetable enquiries, and other university support needs.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="support-overview">
+      <div class="container">
+        <div class="section-header">
+          <h2>Contact and Support Channels</h2>
+          <p>Choose the most suitable way to get help based on your issue.</p>
+        </div>
+
+        <div class="support-grid">
+          <article class="support-card">
+            <div class="support-card-icon"><i class="fa-solid fa-headset"></i></div>
+            <h3>General Helpdesk</h3>
+            <p>For account support, portal issues, password reset, and common campus enquiries.</p>
+            <ul>
+              <li>Email: support@excellenceuniversity.edu</li>
+              <li>Phone: +65 6123 4567</li>
+              <li>Hours: Mon–Fri, 9:00 AM – 6:00 PM</li>
+            </ul>
+          </article>
+
+          <article class="support-card">
+            <div class="support-card-icon"><i class="fa-solid fa-wifi"></i></div>
+            <h3>IT Support</h3>
+            <p>For Wi-Fi, student portal access, login issues, and device connectivity problems.</p>
+            <ul>
+              <li>Email: itsupport@excellenceuniversity.edu</li>
+              <li>Phone: +65 6123 4500</li>
+              <li>Location: IT Service Counter, Block A</li>
+            </ul>
+          </article>
+
+          <article class="support-card">
+            <div class="support-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+            <h3>Student Services</h3>
+            <p>For timetable, academic records, enrolment, and administrative questions.</p>
+            <ul>
+              <li>Email: studentservices@excellenceuniversity.edu</li>
+              <li>Phone: +65 6123 4588</li>
+              <li>Location: Student Services Centre</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="campus-location-section">
+      <div class="container">
+        <div class="section-header">
+          <h2>Directions to Our Campus</h2>
+          <p>Find our location on the map and view travel options below.</p>
+        </div>
+
+        <div class="campus-map-card">
+          <iframe title="Excellence University Campus Map"
+            src="https://www.google.com/maps?q=1.3294548271115878,103.77620668645072&output=embed" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade" allowfullscreen>
+          </iframe>
+        </div>
+
+        <div class="directions-accordion">
+          <details class="direction-item" open>
+            <summary>
+              <span>By Train</span>
+            </summary>
+            <div class="direction-content">
+              <p>
+                Alight at <strong>Clementi MRT Station (EW23)</strong> and take Exit B.
+                Afterwards, board <strong>bus 154, 184 or 52</strong> and alight on the 11th stop.
+              </p>
+            </div>
+          </details>
+
+          <details class="direction-item">
+            <summary>
+              <span>By Bus</span>
+            </summary>
+            <div class="direction-content">
+              <p>
+                Bus services: 52, 61, 74, 75, 151, 154, 184
+              </p>
+            </div>
+          </details>
+
+          <details class="direction-item">
+            <summary>
+              <span>Parking Charges</span>
+            </summary>
+            <div class="direction-content">
+              <p>
+                S$1.32 per hour based on 30-minute block charging (inclusive of GST, 15 minutes grace period)
+              </p>
+              <p>
+                Daily except public holidays, 6am to 11pm
+              </p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-v3">
+    <div class="container footer-v3-grid">
+      <div class="footer-col">
+        <div class="footer-logo-block">
+          <div class="footer-logo-circle">
+            <img src="{{ url_for('static', filename='images/school-logo.png') }}" alt="Excellence University Logo"
+              class="footer-logo-img" />
+          </div>
+
+          <div>
+            <h3>Excellence University</h3>
+            <p class="footer-address">
+              461 Clementi Road,<br />
+              Singapore 599491
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <ul class="footer-links">
+          <li><a href="#">Admissions</a></li>
+          <li><a href="#">Academic Programmes</a></li>
+          <li><a href="#">Research</a></li>
+          <li><a href="#">Student Life</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul class="footer-links">
+          <li><a href="{{ url_for('support') }}">Contact Us</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Connect with Us</h4>
+        <div class="footer-socials">
+          <a href="https://x.com/" class="social-icon" aria-label="X" target="_blank" rel="noopener noreferrer">
+            <i class="fa-brands fa-x-twitter"></i>
+          </a>
+          <a href="https://youtube.com/" class="social-icon" aria-label="YouTube" target="_blank"
+            rel="noopener noreferrer">
+            <i class="fa-brands fa-youtube"></i>
+          </a>
+          <a href="https://tiktok.com/" class="social-icon" aria-label="TikTok" target="_blank"
+            rel="noopener noreferrer">
+            <i class="fa-brands fa-tiktok"></i>
+          </a>
+          <a href="https://instagram.com/" class="social-icon" aria-label="Instagram" target="_blank"
+            rel="noopener noreferrer">
+            <i class="fa-brands fa-instagram"></i>
+          </a>
+          <a href="https://web.telegram.org/" class="social-icon" aria-label="Telegram" target="_blank"
+            rel="noopener noreferrer">
+            <i class="fa-brands fa-telegram"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container footer-v3-bottom">
+      <p>Last updated: 6 May 2026</p>
+      <p>© 2026 Excellence University. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button class="chat-launcher" id="chatLauncher" aria-label="Open chatbot">
+    <img src="{{ url_for('static', filename='images/chatbot-logo.jpg') }}" alt="" class="chat-launcher-img" />
+  </button>
+
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <img src="{{ url_for('static', filename='images/chatbot-logo.jpg') }}" alt="Chatbot Logo"
+          class="chat-avatar-img" />
+        <div>
+          <strong>Ask UniHelp</strong>
+          <p>Virtual Helpdesk Assistant</p>
+        </div>
+      </div>
+
+      <div class="chat-controls">
+        <button id="restartChat" type="button" aria-label="Restart conversation">↺</button>
+        <button id="minimizeChat" type="button" aria-label="Minimize chat">—</button>
+      </div>
+    </div>
+
+    <div class="chat-body" id="chatBody">
+      <div class="message-wrapper bot">
+        <div class="message bot">
+          Hi, I’m UniHelp. I can assist with password reset, portal access, Wi-Fi issues, and common campus enquiries.
+        </div>
+      </div>
+
+      <div class="end-indicator">End of response</div>
+
+      <div class="quick-replies" id="quickReplies">
+        <button type="button" class="quick-reply-btn" data-reply="Password Reset">Password Reset</button>
+        <button type="button" class="quick-reply-btn" data-reply="Wi-Fi Problem">Wi-Fi Problem</button>
+        <button type="button" class="quick-reply-btn" data-reply="Student Portal Help">Student Portal Help</button>
+        <button type="button" class="quick-reply-btn" data-reply="Talk to Live Agent">Talk to Live Agent</button>
+      </div>
+    </div>
+
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Type your message..." aria-label="Chat message input" />
+      <button id="sendBtn" type="button">Send</button>
+    </div>
+
+    <div class="chat-feedback-bar">
+      <button type="button" id="openFeedbackBtn" class="feedback-trigger-btn">
+        Rate chat
+      </button>
+      <button type="button" class="end-chat-btn" id="endChatBtn">
+        End chat
+      </button>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <script>
+    const endChatBtn = document.getElementById("endChatBtn");
+    if (endChatBtn && typeof endChat === "function") {
+      endChatBtn.addEventListener("click", endChat);
+    }
+  </script>
+</body>
+
+</html>

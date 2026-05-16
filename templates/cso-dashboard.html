@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSO Dashboard | Excellence University</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+  <main class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-top">
+        <div class="admin-logo-block">
+          <img src="{{ url_for('static', filename='images/school-logo.png') }}" alt="Excellence University Logo"
+            class="admin-logo" />
+        </div>
+
+        <div class="admin-user-card">
+          <div class="cso-user-info cso-user-info-only">
+            <strong id="displayName">Loading...</strong>
+            <p id="displayRole">Loading...</p>
+          </div>
+        </div>
+
+        <nav class="admin-sidebar-nav">
+          <a href="#" class="active">All Requests</a>
+          <a href="#">Escalated Cases</a>
+          <a href="#">Resolved Cases</a>
+          <a href="#">History</a>
+
+          <a href="{{ url_for('login') }}" class="cso-logout-link">
+            <span class="logout-icon">⇦</span>
+            <span>Log Out</span>
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+    <section class="admin-main">
+      <div class="admin-header">
+        <h1>View All Escalated Requests</h1>
+      </div>
+
+      <div class="admin-summary-cards">
+        <div class="admin-summary-card">
+          <h3>Total Escalated</h3>
+          <strong>8</strong>
+          <span>Cases assigned</span>
+        </div>
+
+        <div class="admin-summary-card">
+          <h3>Open Cases</h3>
+          <strong>5</strong>
+          <span>Available to respond</span>
+        </div>
+
+        <div class="admin-summary-card">
+          <h3>High Priority</h3>
+          <strong>1</strong>
+          <span>Needs urgent action</span>
+        </div>
+      </div>
+
+      <div class="admin-search-bar">
+        <input type="text" placeholder="Search by case title or topic" />
+      </div>
+
+      <div class="admin-panel">
+        <div class="admin-panel-header">
+          <h2>Assigned Cases</h2>
+        </div>
+
+        <div class="admin-item-list">
+          <article class="admin-item-card">
+            <div class="admin-item-top">
+              <div>
+                <h3>Wi-Fi Connection Issue</h3>
+                <p>Student cannot connect to campus Wi-Fi after password reset.</p>
+              </div>
+              <span class="admin-status-badge flagged">High</span>
+            </div>
+
+            <div class="admin-item-meta">
+              <span><strong>Topic:</strong> IT Support</span>
+              <span><strong>Escalated:</strong> 10:12 AM</span>
+              <span><strong>Last Message:</strong> 10:15 AM</span>
+            </div>
+
+            <div class="admin-item-actions">
+              <button class="admin-primary-btn">Open Chat</button>
+              <button class="admin-secondary-btn">Use Template</button>
+              <button class="admin-secondary-btn">Mark Resolved</button>
+            </div>
+          </article>
+
+          <article class="admin-item-card">
+            <div class="admin-item-top">
+              <div>
+                <h3>Portal Login Problem</h3>
+                <p>User unable to access student portal after multiple login attempts.</p>
+              </div>
+              <span class="admin-status-badge draft">Medium</span>
+            </div>
+
+            <div class="admin-item-meta">
+              <span><strong>Topic:</strong> Student Portal</span>
+              <span><strong>Escalated:</strong> 10:28 AM</span>
+              <span><strong>Last Message:</strong> 10:31 AM</span>
+            </div>
+
+            <div class="admin-item-actions">
+              <button class="admin-primary-btn">Open Chat</button>
+              <button class="admin-secondary-btn">Use Template</button>
+              <button class="admin-secondary-btn">Mark Resolved</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="{{ url_for('static', filename='js/supabase-config.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='js/auth-guard.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/logout.js') }}"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      await guardDashboard("cso", "Customer Service Officer");
+      bindLogout([".cso-logout-link"]);
+    });
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Staff Login | Excellence University</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="top-row container">
+      <a href="{{ url_for('home') }}" class="brand">
+        <img
+          src="{{ url_for('static', filename='images/school-logo.png') }}"
+          alt="Excellence University Logo"
+          class="brand-logo"
+        />
+
+        <div class="brand-text">
+          <strong>Excellence University</strong>
+          <span>Future-ready learning</span>
+        </div>
+      </a>
+
+      <div class="header-actions">
+        <a href="{{ url_for('home') }}" class="home-cta">
+          Back to Home Page
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="login-page">
+    <section class="login-section">
+      <div class="login-card">
+        <div class="login-header">
+          <h1>Staff Login</h1>
+          <p>Select your role and sign in.</p>
+        </div>
+
+        <form id="loginForm" novalidate>
+          <div class="form-group">
+            <label for="role">Role</label>
+
+            <select id="role" name="role" required>
+              <option value="">Select role</option>
+              <option value="admin">Admin</option>
+              <option value="cso">
+                Customer Service Officer
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Enter your email"
+              autocomplete="email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <button type="submit" class="login-btn">
+            Login
+          </button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = "https://vvydeegctohtefohggxq.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2eWRlZWdjdG9odGVmb2hnZ3hxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTA3MjUsImV4cCI6MjA5NDI4NjcyNX0.xxjY6Rmy7dBOz1LVeHrq9D_Na2jX5VjxeoKFHzUXhCE";
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function bindLoginForm() {
+    const form = document.getElementById("loginForm");
+    if (!form) return;
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const role = document.getElementById("role").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      if (!role || !email || !password) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error || !data.user) {
+        alert(error?.message || "Login failed.");
+        return;
+      }
+
+      const user = data.user;
+
+      const { data: profile, error: profileError } = await supabaseClient
+        .from("profiles")
+        .select("id, full_name, role")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError || !profile) {
+        alert("Profile not found.");
+        return;
+      }
+
+      if (profile.role !== role) {
+        await supabaseClient.auth.signOut();
+        alert("Selected role does not match your account.");
+        return;
+      }
+
+      if (profile.role === "admin") {
+        window.location.href = "/admin-dashboard";
+      } else if (profile.role === "cso") {
+        window.location.href = "/cso-dashboard";
+      } else {
+        alert("Unknown role.");
+      }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", bindLoginForm);
+
+</script>
+</body>
+</html>
