@@ -15,7 +15,7 @@
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
   >
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/CSS/style.css" />
 </head>
 <body>
   <div class="notice-bar">
@@ -28,7 +28,7 @@
   <header class="site-header">
     <div class="top-row container">
       <a href="index.html" class="brand">
-        <img src="school-logo.png" alt="Excellence University Logo" class="brand-logo" />
+        <img src="/images/school-logo.png" alt="Excellence University Logo" class="brand-logo" />
         <div class="brand-text">
           <strong>Excellence University</strong>
           <span>Future-ready learning</span>
@@ -37,15 +37,23 @@
 
       <div class="header-actions">
         <a href="#">Students</a>
-        <a href="#">Staff</a>
         <a href="#">Alumni</a>
+        <a href="login.html" class="staff-cta">Staff</a>
         <a href="support.html" class="header-cta">Support</a>
+
+        <button type="button" id="fontSizeToggle" class="accessibility-btn" aria-label="Toggle larger text">
+          <img src="/images/zoom.png" alt="" class="accessibility-icon" />
+        </button>
+        
+        <button type="button" id="themeToggle" class="theme-toggle" aria-label="Toggle light and dark mode">
+          <span class="theme-icon">🌙</span>
+        </button>
       </div>
     </div>
 
     <div class="nav-row">
       <div class="container nav-inner">
-        <nav class="main-nav">
+        <nav class="main-nav" aria-label="Main navigation">
           <a href="index.html">Home</a>
           <a href="#">About</a>
           <a href="#">Admissions</a>
@@ -126,7 +134,7 @@
         <div class="campus-map-card">
           <iframe
             title="Excellence University Campus Map"
-            src="https://www.google.com/maps?q=1.3294548271115878, 103.77620668645072&output=embed  "
+            src="https://www.google.com/maps?q=1.3294548271115878,103.77620668645072&output=embed"
             loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"
             allowfullscreen>
@@ -140,7 +148,9 @@
             </summary>
             <div class="direction-content">
               <p>
-                Alight at <strong>Clementi MRT Station (EW23)</strong> and take Exit B. Afterwards, board <strong>bus 154, 184 or 52</strong> and alight on the 11th stop
+                Alight at <strong>Clementi MRT Station (EW23)</strong> and take Exit B.
+                Afterwards, board <strong>bus 154, 184 or 52</strong> and alight on the 11th stop.
+              </p>
             </div>
           </details>
 
@@ -177,10 +187,16 @@
     <div class="container footer-v3-grid">
       <div class="footer-col">
         <div class="footer-logo-block">
-          <img src="school-logo.png" alt="Excellence University Logo" class="footer-logo-img" />
+          <div class="footer-logo-circle">
+            <img src="/images/school-logo.png" alt="Excellence University Logo" class="footer-logo-img" />
+          </div>
+
           <div>
             <h3>Excellence University</h3>
-            <p class="footer-address">461 Clementi Road, Singapore 599491</p>
+            <p class="footer-address">
+              461 Clementi Road,<br />
+              Singapore 599491
+            </p>
           </div>
         </div>
       </div>
@@ -231,13 +247,13 @@
   </footer>
 
   <button class="chat-launcher" id="chatLauncher" aria-label="Open chatbot">
-    <img src="chatbot-logo.jpg" alt="" class="chat-launcher-img" />
+    <img src="/images/chatbot-logo.jpg" alt="" class="chat-launcher-img" />
   </button>
 
   <div class="chat-window" id="chatWindow">
     <div class="chat-header">
       <div class="chat-header-left">
-        <img src="chatbot-logo.jpg" alt="Chatbot Logo" class="chat-avatar-img" />
+        <img src="/images/chatbot-logo.jpg" alt="Chatbot Logo" class="chat-avatar-img" />
         <div>
           <strong>Ask UniHelp</strong>
           <p>Virtual Helpdesk Assistant</p>
@@ -245,9 +261,8 @@
       </div>
 
       <div class="chat-controls">
-        <button id="restartChat" aria-label="Restart conversation">↺</button>
-        <button id="minimizeChat" aria-label="Minimize chat">—</button>
-        <button id="closeChat" aria-label="Close chat">✕</button>
+        <button id="restartChat" type="button" aria-label="Restart conversation">↺</button>
+        <button id="minimizeChat" type="button" aria-label="Minimize chat">—</button>
       </div>
     </div>
 
@@ -256,25 +271,44 @@
         <div class="message bot">
           Hi, I’m UniHelp. I can assist with password reset, portal access, Wi-Fi issues, and common campus enquiries.
         </div>
-        <div class="message-time bot">09:00 AM</div>
       </div>
 
       <div class="end-indicator">End of response</div>
 
       <div class="quick-replies" id="quickReplies">
-        <button type="button" data-reply="Password Reset">Password Reset</button>
-        <button type="button" data-reply="Wi-Fi Problem">Wi-Fi Problem</button>
-        <button type="button" data-reply="Student Portal Help">Student Portal Help</button>
-        <button type="button" data-reply="Talk to Live Agent">Talk to Live Agent</button>
+        <button type="button" class="quick-reply-btn" data-reply="Password Reset">Password Reset</button>
+        <button type="button" class="quick-reply-btn" data-reply="Wi-Fi Problem">Wi-Fi Problem</button>
+        <button type="button" class="quick-reply-btn" data-reply="Student Portal Help">Student Portal Help</button>
+        <button type="button" class="quick-reply-btn" data-reply="Talk to Live Agent">Talk to Live Agent</button>
       </div>
     </div>
 
     <div class="chat-input">
-      <input type="text" id="chatInput" placeholder="Type your message..." />
+      <input
+        type="text"
+        id="chatInput"
+        placeholder="Type your message..."
+        aria-label="Chat message input"
+      />
       <button id="sendBtn" type="button">Send</button>
+    </div>
+
+    <div class="chat-feedback-bar">
+      <button type="button" id="openFeedbackBtn" class="feedback-trigger-btn">
+      Rate chat
+      </button>
+      <button type="button" class="end-chat-btn" id="endChatBtn">
+        End chat
+      </button>
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script src="/JS/script.js"></script>
+  <script>
+    const endChatBtn = document.getElementById("endChatBtn");
+    if (endChatBtn && typeof endChat === "function") {
+      endChatBtn.addEventListener("click", endChat);
+    }
+  </script>
 </body>
 </html>

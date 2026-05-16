@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Staff Login | Excellence University</title>
+
+  <link rel="stylesheet" href="/CSS/style.css" />
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="top-row container">
+      <a href="index.html" class="brand">
+        <img
+          src="/images/school-logo.png"
+          alt="Excellence University Logo"
+          class="brand-logo"
+        />
+
+        <div class="brand-text">
+          <strong>Excellence University</strong>
+          <span>Future-ready learning</span>
+        </div>
+      </a>
+
+      <div class="header-actions">
+        <a href="index.html" class="home-cta">
+          Back to Home Page
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="login-page">
+    <section class="login-section">
+      <div class="login-card">
+        <div class="login-header">
+          <h1>Staff Login</h1>
+          <p>Select your role and sign in.</p>
+        </div>
+
+        <form id="loginForm" novalidate>
+          <div class="form-group">
+            <label for="role">Role</label>
+
+            <select id="role" name="role" required>
+              <option value="">Select role</option>
+              <option value="admin">Admin</option>
+              <option value="cso">
+                Customer Service Officer
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Enter your email"
+              autocomplete="email"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <button type="submit" class="login-btn">
+            Login
+          </button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Scripts -->
+  <script src="/JS/supabase-config.js"></script>
+  <script src="/JS/login.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (typeof bindLoginForm === "function") {
+        bindLoginForm();
+      }
+    });
+  </script>
+</body>
+</html>
