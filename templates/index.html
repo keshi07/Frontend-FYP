@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,16 +10,10 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <!-- Icons used in footer social links -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
   <!-- Main stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -28,11 +23,8 @@
   <header class="site-header">
     <div class="top-row container">
       <a href="index.html" class="brand">
-        <img
-          src="{{ url_for('static', filename='images/school-logo.png') }}"
-          alt="Excellence University Logo"
-          class="brand-logo"
-        />
+        <img src="{{ url_for('static', filename='images/school-logo.png') }}" alt="Excellence University Logo"
+          class="brand-logo" />
 
         <div class="brand-text">
           <strong>Excellence University</strong>
@@ -46,21 +38,11 @@
         <a href="{{ url_for('login') }}" class="staff-cta">Staff</a>
         <a href="{{ url_for('support') }}" class="header-cta">Support</a>
 
-        <button
-          type="button"
-          id="fontSizeToggle"
-          class="accessibility-btn"
-          aria-label="Toggle larger text"
-        >
+        <button type="button" id="fontSizeToggle" class="accessibility-btn" aria-label="Toggle larger text">
           <img src="{{ url_for('static', filename='images/zoom.png') }}" alt="" class="accessibility-icon" />
         </button>
 
-        <button
-          type="button"
-          id="themeToggle"
-          class="theme-toggle"
-          aria-label="Toggle light and dark mode"
-        >
+        <button type="button" id="themeToggle" class="theme-toggle" aria-label="Toggle light and dark mode">
           <span class="theme-icon">🌙</span>
         </button>
       </div>
@@ -100,7 +82,7 @@
     </div>
   </section>
 
-  <main>  
+  <main>
     <section class="campus-services">
       <div class="container">
         <div class="services-top">
@@ -272,11 +254,8 @@
       <div class="footer-col">
         <div class="footer-logo-block">
           <div class="footer-logo-circle">
-            <img
-              src="{{ url_for('static', filename='images/school-logo.png') }}"
-              alt="Excellence University Logo"
-              class="footer-logo-img"
-            />
+            <img src="{{ url_for('static', filename='images/school-logo.png') }}" alt="Excellence University Logo"
+              class="footer-logo-img" />
           </div>
 
           <div>
@@ -309,53 +288,27 @@
         <h4>Connect with Us</h4>
 
         <div class="footer-socials">
-          <a
-            href="https://x.com/"
-            class="social-icon"
-            aria-label="X"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="https://x.com/" class="social-icon" aria-label="X" target="_blank" rel="noopener noreferrer">
             <i class="fa-brands fa-x-twitter"></i>
           </a>
 
-          <a
-            href="https://youtube.com/"
-            class="social-icon"
-            aria-label="YouTube"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="https://youtube.com/" class="social-icon" aria-label="YouTube" target="_blank"
+            rel="noopener noreferrer">
             <i class="fa-brands fa-youtube"></i>
           </a>
 
-          <a
-            href="https://tiktok.com/"
-            class="social-icon"
-            aria-label="TikTok"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="https://tiktok.com/" class="social-icon" aria-label="TikTok" target="_blank"
+            rel="noopener noreferrer">
             <i class="fa-brands fa-tiktok"></i>
           </a>
 
-          <a
-            href="https://instagram.com/"
-            class="social-icon"
-            aria-label="Instagram"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="https://instagram.com/" class="social-icon" aria-label="Instagram" target="_blank"
+            rel="noopener noreferrer">
             <i class="fa-brands fa-instagram"></i>
           </a>
 
-          <a
-            href="https://web.telegram.org/"
-            class="social-icon"
-            aria-label="Telegram"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a href="https://web.telegram.org/" class="social-icon" aria-label="Telegram" target="_blank"
+            rel="noopener noreferrer">
             <i class="fa-brands fa-telegram"></i>
           </a>
         </div>
@@ -369,21 +322,15 @@
   </footer>
 
   <button class="chat-launcher" id="chatLauncher" aria-label="Open chatbot">
-    <img
-      src="{{ url_for('static', filename='images/chatbot-logo.jpg') }}"
-      alt="Open chatbot"
-      class="chat-launcher-img"
-    />
+    <img src="{{ url_for('static', filename='images/chatbot-logo.jpg') }}" alt="Open chatbot"
+      class="chat-launcher-img" />
   </button>
 
   <div class="chat-window" id="chatWindow">
     <div class="chat-header">
       <div class="chat-header-left">
-        <img
-          src="{{ url_for('static', filename='images/chatbot-logo.jpg') }}"
-          alt="Chatbot Logo"
-          class="chat-avatar-img"
-        />
+        <img src="{{ url_for('static', filename='images/chatbot-logo.jpg') }}" alt="Chatbot Logo"
+          class="chat-avatar-img" />
 
         <div>
           <strong>Ask UniHelp</strong>
@@ -411,17 +358,6 @@
       </div>
 
       <div class="end-indicator">End of response</div>
-
-      <div class="quick-replies" id="quickReplies">
-        <button type="button" data-reply="Password Reset">Password Reset</button>
-        <button type="button" data-reply="Wi-Fi Problem">Wi-Fi Problem</button>
-        <button type="button" data-reply="Student Portal Help">
-          Student Portal Help
-        </button>
-        <button type="button" data-reply="Talk to Live Agent">
-          Talk to Live Agent
-        </button>
-      </div>
     </div>
 
     <div class="chat-input">
@@ -479,11 +415,7 @@
             Additional comments
           </label>
 
-          <textarea
-            id="feedbackText"
-            rows="4"
-            placeholder="Tell us more about your experience..."
-          ></textarea>
+          <textarea id="feedbackText" rows="4" placeholder="Tell us more about your experience..."></textarea>
         </div>
 
         <button type="button" id="submitFeedbackBtn" class="feedback-submit-btn">
@@ -499,4 +431,5 @@
 
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
+
 </html>

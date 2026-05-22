@@ -1,3 +1,4 @@
+let sessionId = crypto.randomUUID();
 const chatLauncher = document.getElementById("chatLauncher");
 const chatWindow = document.getElementById("chatWindow");
 const restartChat = document.getElementById("restartChat");
@@ -5,7 +6,6 @@ const minimizeChat = document.getElementById("minimizeChat");
 const sendBtn = document.getElementById("sendBtn");
 const chatInput = document.getElementById("chatInput");
 const chatBody = document.getElementById("chatBody");
-const quickReplies = document.getElementById("quickReplies");
 
 const noticeClose = document.querySelector(".notice-close");
 const noticeBar = document.querySelector(".notice-bar");
@@ -174,84 +174,120 @@ function showTypingIndicator() {
    Quick Replies
 ========================= */
 
-function renderQuickReplies(options = []) {
-  if (!quickReplies) return;
+if (chatBody) {
+  chatBody.addEventListener("click", async (event) => {
+    const button = event.target.closest(".quick-reply-btn");
+    if (!button) return;
 
-  quickReplies.innerHTML = "";
-
-  options.forEach((option) => {
-    const button = document.createElement("button");
-
-    button.type = "button";
-    button.className = "quick-reply-btn";
-    button.dataset.reply = option;
-    button.textContent = option;
-
-    quickReplies.appendChild(button);
+    await sendUserMessage(button.dataset.reply);
   });
 }
 
+function renderQuickReplies(replies = []) {
+  const existing = chatBody.querySelector(".quick-replies");
+  if (existing) existing.remove();
 
+  if (!replies.length) return;
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "quick-replies";
+
+  replies.forEach((text) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "quick-reply-btn";
+    btn.textContent = text;
+    btn.dataset.reply = text;
+    wrapper.appendChild(btn);
+  });
+
+  chatBody.appendChild(wrapper);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function removeQuickReplies() {
+  const existing = chatBody.querySelector(".quick-replies");
+  if (existing) existing.remove();
+}
+
+
+function initializeChat() {
+  if (!chatBody) return;
+
+  chatBody.innerHTML = "";
+  addMessage(initialBotMessage, "bot");
+  renderQuickReplies(initialQuickReplies);
+}
 
 /* =========================
    Restart Chat
 ========================= */
 
 function restartConversation() {
-  if (!chatBody) return;
+  sessionId = crypto.randomUUID();
 
   removeTypingIndicator();
   removeEndIndicator();
+  removeQuickReplies();
 
-  chatBody.innerHTML = "";
+  initializeChat();
 
-  addMessage(initialBotMessage, "bot");
+  chatInput.disabled = false;
+  chatInput.value = "";
+  chatInput.placeholder = "Type your message...";
+  chatInput.focus();
+  sendBtn.disabled = false;
 
-  renderQuickReplies(initialQuickReplies);
-
-  if (chatInput) {
-    chatInput.value = "";
-    chatInput.focus();
-  }
+  chatBody.scrollTop = chatBody.scrollHeight;
 }
-
-
-
-/* =========================
-   Bot Responses
-========================= */
-
-function getBotReply(userText) {
-  const value = userText.toLowerCase();
-
-  if (value.includes("password")) {
-    return "You can reset your password through the university self-service portal. Would you like me to guide you to the support page?";
-  }
-
-  if (value.includes("wifi") || value.includes("wi-fi")) {
-    return "I can help with Wi-Fi issues. Are you unable to connect, using the wrong password, or facing slow connection?";
-  }
-
-  if (value.includes("portal")) {
-    return "For student portal help, please make sure your login details are correct. You can also access the portal support page from the Support section.";
-  }
-
-  if (value.includes("agent") || value.includes("human")) {
-    return "A live support officer is available during office hours. Estimated waiting time is around 5 to 10 minutes.";
-  }
-
-  if (value.includes("timetable") || value.includes("exam")) {
-    return "You can check timetable and exam-related information through the student portal.";
-  }
-
-  return "Sorry, I’m not fully sure what you mean. Please rephrase your question or choose one of the quick reply options.";
-}
-
-
 
 /* =========================
    Send Message
 ========================= */
+
+async function sendUserMessage(text) {
+  if (!text) return;
+
+  removeQuickReplies();
+  removeEndIndicator();
+  addMessage(text, "user");
+  showTypingIndicator();
+
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        sessionId: sessionId
+      })
+    });
+
+    const data = await response.json();
+    removeTypingIndicator();
+
+    if (!response.ok) {
+      addMessage(data.reply || "Something went wrong.", "bot");
+      renderQuickReplies(initialQuickReplies);
+      return;
+    }
+
+    addMessage(data.reply || "Sorry, no reply from server.", "bot");
+
+    const repliesToShow =
+      Array.isArray(data.quickReplies) && data.quickReplies.length > 0
+        ? data.quickReplies
+        : initialQuickReplies;
+
+    renderQuickReplies(repliesToShow);
+
+  } catch (err) {
+    console.error("sendUserMessage error:", err);
+    removeTypingIndicator();
+    addMessage("Error talking to server. Please try again later.", "bot");
+    renderQuickReplies(initialQuickReplies);
+  }
+}
 
 async function sendMessage() {
   if (!chatInput) return;
@@ -259,27 +295,9 @@ async function sendMessage() {
   const text = chatInput.value.trim();
   if (!text) return;
 
-  removeEndIndicator();
-  addMessage(text, "user");
   chatInput.value = "";
-  showTypingIndicator();
-
-  try {
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text })
-    });
-
-    const data = await response.json();
-    removeTypingIndicator();
-    addMessage(data.reply || "Sorry, no reply from server.", "bot");
-  } catch (err) {
-    removeTypingIndicator();
-    addMessage("Error talking to server. Please try again later.", "bot");
-  }
+  await sendUserMessage(text);
 }
-
 
 
 /* =========================
@@ -405,23 +423,6 @@ chatInput?.addEventListener("keydown", (event) => {
   }
 });
 
-quickReplies?.addEventListener("click", (event) => {
-  const button = event.target.closest("button");
-
-  if (!button) return;
-
-  const reply = button.dataset.reply;
-
-  removeEndIndicator();
-
-  addMessage(reply, "user");
-
-  showTypingIndicator();
-
-  setTimeout(() => {
-    addMessage(getBotReply(reply), "bot");
-  }, 700);
-});
 
 openFeedbackBtn?.addEventListener("click", () => {
   feedbackModal?.classList.add("show");
@@ -503,5 +504,5 @@ fontSizeToggle?.addEventListener("click", () => {
 ========================= */
 
 applyTheme(localStorage.getItem("theme") || "light");
-
 applyFontSizePreference();
+initializeChat();
