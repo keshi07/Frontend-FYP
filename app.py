@@ -5,6 +5,7 @@ import os
 import requests
 
 app = Flask(__name__)
+app.config["TEMPLATES_AUTO_RELOAD"] = True
 CORS(app)  # okay for dev
 
 supabase_url = ("https://vvydeegctohtefohggxq.supabase.co")
@@ -32,6 +33,10 @@ def cso_dashboard():
 @app.route("/support")
 def support():
     return render_template("support.html")
+
+@app.route("/faq-management")
+def faq_management():
+    return render_template("faq-management.html")
 
 def detect_intent_text(text, session_id):
     session_client = dialogflow.SessionsClient()
@@ -168,4 +173,5 @@ def chat():
     
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+
+    app.run(debug=True, port=5000, use_reloader=True)

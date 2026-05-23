@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FAQ Management | Excellence University</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='CSS/style.css') }}" />
+</head>
+<body>
+    
+  <div class="admin-layout faq-management-page">
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-top">
+        <div class="admin-logo-block">
+          <img
+            src="{{ url_for('static', filename='images/school-logo.png') }}"
+            alt="Excellence University Logo"
+            class="admin-logo"
+          />
+        </div>
+
+        <div class="admin-user-card">
+          <div class="admin-user-info-only">
+            <strong id="displayName">Loading...</strong>
+            <p id="displayRole">Loading...</p>
+          </div>
+        </div>
+
+        <nav class="admin-sidebar-nav" aria-label="Admin navigation">
+          <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('faq_management') }}" class="active">FAQ Management</a>
+          <a href="#">Response Templates</a>
+          <a href="#">Spam Reports</a>
+        </nav>
+
+        <a href="{{ url_for('login') }}" class="admin-logout-link">
+          <span class="logout-icon">⇦</span>
+          <span>Log Out</span>
+        </a>
+      </div>
+    </aside>
+
+    <main class="faq-management-main">
+      <div class="faq-management-header">
+        <h1>FAQ Management</h1>
+        <p>Manage Dialogflow intents and their chatbot answers stored in Supabase.</p>
+      </div>
+
+      <div class="faq-management-toolbar">
+        <div class="faq-search-box">
+          <input
+            type="text"
+            id="faqSearch"
+            placeholder="Search by intent, category, or answer"
+          />
+        </div>
+
+        <button type="button" class="faq-add-btn" id="newFaqBtn">
+          + New FAQ
+        </button>
+      </div>
+
+      <div class="faq-management-grid">
+        <section class="faq-form-card">
+          <h2 id="faqFormTitle">Add FAQ</h2>
+
+          <form id="faqForm" class="faq-form">
+            <input type="hidden" id="faqId" />
+
+            <div>
+              <label for="faqIntent">Intent Name</label>
+              <input
+                type="text"
+                id="faqIntent"
+                placeholder="e.g. ask_add_drop_deadline"
+                required
+              />
+            </div>
+
+            <div>
+              <label for="faqCategory">Category</label>
+              <input
+                type="text"
+                id="faqCategory"
+                placeholder="e.g. Academic, Finance, Portal"
+              />
+            </div>
+
+            <div>
+              <label for="faqAnswer">Answer</label>
+              <textarea
+                id="faqAnswer"
+                placeholder="Enter chatbot answer here..."
+                required
+              ></textarea>
+            </div>
+
+            <div class="faq-checkbox-row">
+              <input type="checkbox" id="faqActive" checked />
+              <label for="faqActive">Active</label>
+            </div>
+
+            <div class="faq-form-actions">
+              <button type="submit" class="faq-save-btn">Save FAQ</button>
+              <button type="button" class="faq-cancel-btn" id="cancelFaqEdit">
+                Clear
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <section class="faq-list-card">
+          <h2>All FAQs</h2>
+          <div id="faqList" class="faq-list">
+            <div class="faq-empty-state">Loading FAQs...</div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="{{ url_for('static', filename='JS/supabase-config.js') }}"></script>
+  <script src="{{ url_for('static', filename='JS/auth-guard.js') }}"></script>
+  <script src="{{ url_for('static', filename='JS/logout.js') }}"></script>
+  <script src="{{ url_for('static', filename='JS/faq-management.js') }}"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      await guardDashboard("admin", "System Administrator");
+      bindLogout([".admin-logout-link"]);
+
+      if (typeof initFaqManagementPage === "function") {
+        initFaqManagementPage();
+      }
+    });
+  </script>
+</body>
+</html>
