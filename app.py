@@ -12,7 +12,6 @@ supabase_key = ("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 
 PROJECT_ID = "universitychatbot-ejvs"
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "universitychatbot-ejvs-a55dbb1e398c.json"
-SESSION_ID = "demo-session" 
 @app.route("/")
 def home():
     
@@ -93,31 +92,80 @@ def get_user_profile(user_id):
         return rows[0]
     return None
 
+def get_quick_replies(intent_name):
+    quick_reply_map = {
+        "Default Welcome Intent": [
+            "Student Card Replacement",
+            "Tuition Fees",
+            "Course Transfer",
+            "Exam Information",
+            "Operating Hours",
+            "Speak to Live Agent"
+        ],
+        "student_card_replacement": [
+            "Lost/Stolen",
+            "Damaged"
+        ],
+        "student_card_replacement.damaged": [
+            "Operating Hours",
+            "Location"
+        ],
+        "operating_hours": [
+            "Library",
+            "Student Services",
+            "IT Helpdesk"
+        ],
+        "wifi_issue": [
+            "Windows Laptop",
+            "MacBook",
+            "Mobile Device"
+        ],
+        "tuition_fee_payment": [
+            "Credit Card",
+            "PayNow",
+            "GIRO"
+        ],
+        "tuition_fee_payment.installment_plan": [
+            "Yes",
+            "No"
+        ],
+        "course_transfer": [
+            "Local Student",
+            "International Student"
+        ]
+    }
+    return quick_reply_map.get(intent_name, [])
+
+
 @app.route("/api/chat", methods=["POST"])
 def chat():
     data = request.get_json()
     user_text = data.get("message", "").strip()
+    session_id = data.get("sessionId", "").strip()
 
     if not user_text:
         return jsonify({"reply": "Please type a message."}), 400
 
+    if not session_id:
+        return jsonify({"reply": "Missing session ID."}), 400
+
     try:
-        session_id = SESSION_ID
         df_result = detect_intent_text(user_text, session_id)
         intent_name = df_result["intent"]
 
         db_answer = get_faq_answer(intent_name)
-
-        if db_answer:
-            return jsonify({"reply": db_answer, "intent": intent_name})
+        reply_text = db_answer or df_result["reply"] or "Sorry, I couldn't find a matching answer."
 
         return jsonify({
-            "reply": df_result["reply"] or "Sorry, I couldn't find a matching answer.",
-            "intent": intent_name
+            "reply": reply_text,
+            "intent": intent_name,
+            "sessionId": session_id,
+            "quickReplies": get_quick_replies(intent_name)
         })
 
     except Exception as e:
         return jsonify({"reply": f"Server error: {str(e)}"}), 500
+    
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
