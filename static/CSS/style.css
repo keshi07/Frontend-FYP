@@ -17,24 +17,20 @@
   --shadow-lg: 0 22px 45px rgba(7, 27, 54, 0.24);
 
   --gradient-primary:
-    linear-gradient(
-      135deg,
+    linear-gradient(135deg,
       #061a33 0%,
       #08284d 55%,
-      #005fd1 100%
-    );
+      #005fd1 100%);
 
   --gradient-campus:
-    linear-gradient(
-      180deg,
+    linear-gradient(180deg,
       #ffffff 0%,
       #f5f9ff 20%,
       #eaf4ff 42%,
       #cfe3f7 58%,
       #587894 72%,
       #17385d 84%,
-      #061a33 100%
-    );
+      #061a33 100%);
 
   --shadow: var(--shadow-md);
 }
@@ -247,14 +243,11 @@ img {
   position: relative;
   min-height: clamp(520px, 55vh, 720px);
   background:
-    linear-gradient(
-      90deg,
+    linear-gradient(90deg,
       rgba(8, 27, 51, 0.84) 0%,
       rgba(8, 27, 51, 0.56) 42%,
-      rgba(8, 27, 51, 0.18) 100%
-    ),
-    url("https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1600&q=80")
-      center / cover no-repeat;
+      rgba(8, 27, 51, 0.18) 100%),
+    url("https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1600&q=80") center / cover no-repeat;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -515,12 +508,10 @@ img {
 }
 
 .showcase-card::before {
-  background: linear-gradient(
-    to top,
-    rgba(7, 27, 54, 0.75),
-    rgba(7, 27, 54, 0.2),
-    rgba(7, 27, 54, 0)
-  );
+  background: linear-gradient(to top,
+      rgba(7, 27, 54, 0.75),
+      rgba(7, 27, 54, 0.2),
+      rgba(7, 27, 54, 0));
 }
 
 .showcase-card:hover,
@@ -593,11 +584,9 @@ img {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(
-      to top,
+    linear-gradient(to top,
       rgba(255, 255, 255, 0.02),
-      rgba(255, 255, 255, 0)
-    );
+      rgba(255, 255, 255, 0));
   pointer-events: none;
 }
 
@@ -654,12 +643,10 @@ img {
 
 .experience-card::before {
   background:
-    linear-gradient(
-      to top,
+    linear-gradient(to top,
       rgba(0, 0, 0, 0.75),
       rgba(0, 0, 0, 0.2),
-      rgba(0, 0, 0, 0)
-    );
+      rgba(0, 0, 0, 0));
 }
 
 .experience-large {
@@ -759,7 +746,7 @@ img {
   padding: 0;
 }
 
-.footer-links li + li {
+.footer-links li+li {
   margin-top: 10px;
 }
 
@@ -2192,6 +2179,7 @@ body.dark-mode .faq-form textarea {
     opacity: 0;
     transform: translateY(-8px) translateX(12px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) translateX(0);
@@ -2213,6 +2201,7 @@ body.dark-mode .faq-form textarea {
 
 /* Responsive */
 @media (max-width: 1100px) {
+
   .footer-v3-grid,
   .support-grid,
   .form-row {
