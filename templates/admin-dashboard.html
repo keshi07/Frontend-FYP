@@ -28,10 +28,7 @@
 
         <nav class="admin-sidebar-nav" aria-label="Admin navigation">
           <a href="#" class="active">Dashboard</a>
-          <a href="#">FAQ Management</a>
-          <a href="#">Response Templates</a>
-          <a href="#">Spam Reports</a>
-
+          <a href="{{ url_for('faq_management') }}">FAQ Management</a>
           <a href="{{ url_for('login') }}" class="admin-logout-link">
             <span class="logout-icon">⇦</span>
             <span>Log Out</span>
