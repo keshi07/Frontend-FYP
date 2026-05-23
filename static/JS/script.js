@@ -25,6 +25,8 @@ const feedbackSuccessMsg = document.getElementById("feedbackSuccessMsg");
 
 const feedbackReactionButtons = document.querySelectorAll(".feedback-reaction");
 
+
+
 const initialBotMessage =
   "Hi, I’m UniHelp. I can assist with password reset, portal access, Wi-Fi issues, and common campus enquiries.";
 
@@ -32,7 +34,8 @@ const initialQuickReplies = [
   "Password Reset",
   "Wi-Fi Problem",
   "Student Portal Help",
-  "Talk to Live Agent"
+  "Talk to Live Agent",
+  "Others"
 ];
 
 const feedbackOptions = {
@@ -55,8 +58,9 @@ const feedbackOptions = {
 
 let selectedFeedbackType = "";
 let selectedFeedbackTags = [];
+
 let sentMessageHistory = [];
-let historyIndex = -1;
+let historyIndex = 0;
 
 
 
@@ -188,6 +192,7 @@ function showTypingIndicator() {
   removeEndIndicator();
 
   const typing = document.createElement("div");
+
   typing.className = "typing-indicator";
 
   typing.innerHTML = `
@@ -197,6 +202,7 @@ function showTypingIndicator() {
   `;
 
   chatBody.appendChild(typing);
+
   chatBody.scrollTop = chatBody.scrollHeight;
 }
 
@@ -211,11 +217,7 @@ if (chatBody) {
     const button = event.target.closest(".quick-reply-btn");
     if (!button) return;
 
-    const reply = button.dataset.reply || "";
-    if (!reply.trim()) return;
-
-    storeSentMessage(reply);
-    await sendUserMessage(reply);
+    await sendUserMessage(button.dataset.reply);
   });
 }
 
@@ -246,6 +248,7 @@ function removeQuickReplies() {
   if (existing) existing.remove();
 }
 
+
 function initializeChat() {
   if (!chatBody) return;
 
@@ -254,16 +257,15 @@ function initializeChat() {
   renderQuickReplies(initialQuickReplies);
 }
 
-
-
 /* =========================
    Restart Chat
 ========================= */
 
 function restartConversation() {
   sessionId = crypto.randomUUID();
+
   sentMessageHistory = [];
-  historyIndex = -1;
+  historyIndex = 0;
 
   removeTypingIndicator();
   removeEndIndicator();
@@ -271,21 +273,14 @@ function restartConversation() {
 
   initializeChat();
 
-  if (chatInput) {
-    chatInput.disabled = false;
-    chatInput.value = "";
-    chatInput.placeholder = "Type your message...";
-    chatInput.focus();
-  }
-
-  if (sendBtn) {
-    sendBtn.disabled = false;
-  }
+  chatInput.disabled = false;
+  chatInput.value = "";
+  chatInput.placeholder = "Type your message...";
+  chatInput.focus();
+  sendBtn.disabled = false;
 
   chatBody.scrollTop = chatBody.scrollHeight;
 }
-
-
 
 /* =========================
    Send Message
@@ -326,6 +321,7 @@ async function sendUserMessage(text) {
         : initialQuickReplies;
 
     renderQuickReplies(repliesToShow);
+
   } catch (err) {
     console.error("sendUserMessage error:", err);
     removeTypingIndicator();
@@ -342,10 +338,10 @@ async function sendMessage() {
 
   storeSentMessage(text);
   chatInput.value = "";
+  historyIndex = sentMessageHistory.length;
+
   await sendUserMessage(text);
 }
-
-
 
 /* =========================
    Feedback Modal
@@ -383,6 +379,7 @@ function resetFeedbackModal() {
   selectedFeedbackTags = [];
 
   feedbackText.value = "";
+
   feedbackSuccessMsg.classList.remove("show");
 
   feedbackReactionButtons.forEach((btn) => {
@@ -439,6 +436,7 @@ function endChat() {
 
   chatInput.disabled = true;
   sendBtn.disabled = true;
+
   chatInput.placeholder = "Chat has ended";
 
   document
@@ -504,7 +502,9 @@ feedbackReactionButtons.forEach((button) => {
     });
 
     button.classList.add("active");
+
     selectedFeedbackType = button.dataset.type;
+
     renderFeedbackTags(selectedFeedbackType);
   });
 });
@@ -536,6 +536,7 @@ themeToggle?.addEventListener("click", () => {
   const nextTheme = isDark ? "light" : "dark";
 
   applyTheme(nextTheme);
+
   localStorage.setItem("theme", nextTheme);
 });
 

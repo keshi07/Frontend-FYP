@@ -29,8 +29,6 @@
         <nav class="admin-sidebar-nav" aria-label="Admin navigation">
           <a href="#" class="active">Dashboard</a>
           <a href="#">FAQ Management</a>
-          <a href="#">Response Templates</a>
-          <a href="#">Spam Reports</a>
 
           <a href="{{ url_for('login') }}" class="admin-logout-link">
             <span class="logout-icon">⇦</span>
@@ -48,102 +46,93 @@
       <div class="admin-summary-cards">
         <div class="admin-summary-card">
           <h3>Total FAQs</h3>
-          <strong>124</strong>
+          <strong id="totalFaqCount">0</strong>
           <span>Published knowledge entries</span>
-        </div>
-
-        <div class="admin-summary-card">
-          <h3>Templates</h3>
-          <strong>38</strong>
-          <span>Available response templates</span>
-        </div>
-
-        <div class="admin-summary-card">
-          <h3>Flagged Messages</h3>
-          <strong>12</strong>
-          <span>Require moderation review</span>
         </div>
       </div>
 
       <div class="admin-search-bar">
-        <input type="search" placeholder="Search FAQ, template, or report" aria-label="Search administrative items" />
+        <input type="search" id="faqSearchInput" placeholder="Search FAQ, template, or report"
+          aria-label="Search administrative items" />
       </div>
 
       <div class="admin-panel">
-        <div class="admin-panel-header">
-          <h2>Recent Administrative Items</h2>
+        <div class="admin-panel-header admin-table-toolbar">
+          <div>
+            <h2>FAQ Management</h2>
+            <p class="admin-panel-subtext">Manage chatbot FAQ answers by intent.</p>
+          </div>
+
+          <div class="admin-item-actions">
+            <button type="button" id="addFaqBtn" class="admin-primary-btn">Add FAQ</button>
+            <button type="button" id="refreshFaqBtn" class="admin-secondary-btn">Refresh</button>
+          </div>
         </div>
 
-        <div class="admin-item-list">
-          <article class="admin-item-card">
-            <div class="admin-item-top">
-              <div>
-                <h3>Password Reset FAQ</h3>
-                <p>Updated the self-service password reset steps for students.</p>
-              </div>
+        <div class="admin-table-wrap">
+          <table class="admin-faq-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Intent</th>
+                <th>Answer</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="faqTableBody">
+              <tr>
+                <td colspan="4">No FAQs found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-              <span class="admin-status-badge updated">Updated</span>
+      <div class="faq-modal-backdrop" id="faqModalBackdrop" hidden></div>
+
+      <div class="faq-modal" id="faqModal" role="dialog" aria-modal="true" aria-labelledby="faqModalTitle" hidden>
+        <div class="faq-modal-content">
+          <div class="faq-modal-header">
+            <h3 id="faqModalTitle" tabindex="-1">Add FAQ</h3>
+            <button type="button" class="faq-modal-close" id="closeFaqModalBtn" aria-label="Close FAQ form">
+              ×
+            </button>
+          </div>
+
+          <form id="faqForm" class="faq-form">
+            <input type="hidden" id="faqId" />
+
+            <div class="form-group">
+              <label for="faqIntent">Intent Name</label>
+              <input type="text" id="faqIntent" placeholder="e.g. ask_payment_methods" required />
             </div>
 
-            <div class="admin-item-meta">
-              <span><strong>Category:</strong> FAQ</span>
-              <span><strong>Last Updated:</strong> Today</span>
+            <div class="form-group">
+              <label for="faqTrainingPhrases">Training Phrases</label>
+              <textarea id="faqTrainingPhrases" rows="6"
+                placeholder="Enter one training phrase per line&#10;e.g.&#10;I lost my student card&#10;replace student card&#10;student card replacement"
+                required></textarea>
+              <small class="form-help-text">
+                Enter one phrase per line. These will be used to create the Dialogflow intent.
+              </small>
             </div>
 
-            <div class="admin-item-actions">
-              <button type="button" class="admin-primary-btn">Edit FAQ</button>
-              <button type="button" class="admin-secondary-btn">View Details</button>
-            </div>
-          </article>
-
-          <article class="admin-item-card">
-            <div class="admin-item-top">
-              <div>
-                <h3>Portal Access Template</h3>
-                <p>Template used when students cannot log in to the portal.</p>
-              </div>
-
-              <span class="admin-status-badge draft">Draft</span>
-            </div>
-
-            <div class="admin-item-meta">
-              <span><strong>Category:</strong> Template</span>
-              <span><strong>Last Updated:</strong> Yesterday</span>
-            </div>
-
-            <div class="admin-item-actions">
-              <button type="button" class="admin-primary-btn">Edit Template</button>
-              <button type="button" class="admin-secondary-btn">Preview</button>
-            </div>
-          </article>
-
-          <article class="admin-item-card">
-            <div class="admin-item-top">
-              <div>
-                <h3>Spam Keyword Report</h3>
-                <p>
-                  Flagged abusive or suspicious messages detected by the
-                  moderation rules.
-                </p>
-              </div>
-
-              <span class="admin-status-badge flagged">Flagged</span>
-            </div>
-
-            <div class="admin-item-meta">
-              <span><strong>Category:</strong> Moderation</span>
-              <span><strong>Last Updated:</strong> 2 days ago</span>
+            <div class="form-group">
+              <label for="faqAnswer">Answer</label>
+              <textarea id="faqAnswer" rows="6" placeholder="Enter FAQ answer" required></textarea>
             </div>
 
             <div class="admin-item-actions">
-              <button type="button" class="admin-primary-btn">Review Report</button>
-              <button type="button" class="admin-secondary-btn">View Details</button>
+              <button type="submit" class="admin-primary-btn">Save FAQ</button>
+              <button type="button" id="cancelFaqModalBtn" class="admin-secondary-btn">Cancel</button>
             </div>
-          </article>
+          </form>
         </div>
       </div>
     </section>
   </main>
+
+  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="{{ url_for('static', filename='js/supabase-config.js') }}"></script>
@@ -151,8 +140,7 @@
 
   <script src="{{ url_for('static', filename='js/auth-guard.js') }}"></script>
   <script src="{{ url_for('static', filename='js/logout.js') }}"></script>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="{{ url_for('static', filename='js/faqmanage.js') }}"></script>
 
 
   <script>
@@ -160,6 +148,7 @@
       await guardDashboard("admin", "System Administrator");
       bindLogout([".admin-logout-link"]);
     });
+
   </script>
 </body>
 
