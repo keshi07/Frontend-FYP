@@ -11,7 +11,7 @@ supabase_url = ("https://vvydeegctohtefohggxq.supabase.co")
 supabase_key = ("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2eWRlZWdjdG9odGVmb2hnZ3hxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MTA3MjUsImV4cCI6MjA5NDI4NjcyNX0.xxjY6Rmy7dBOz1LVeHrq9D_Na2jX5VjxeoKFHzUXhCE")
 
 PROJECT_ID = "universitychatbot-ejvs"
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "universitychatbot-ejvs-a55dbb1e398c.json"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "universitychatbot-ejvs-9bb89b9138f6.json"
 @app.route("/")
 def home():
     
