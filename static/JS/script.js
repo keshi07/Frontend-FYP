@@ -25,18 +25,8 @@ const feedbackSuccessMsg = document.getElementById("feedbackSuccessMsg");
 
 const feedbackReactionButtons = document.querySelectorAll(".feedback-reaction");
 
-
-
 const initialBotMessage =
   "Hi, I’m UniHelp. I can assist with password reset, portal access, Wi-Fi issues, and common campus enquiries.";
-
-const initialQuickReplies = [
-  "Password Reset",
-  "Wi-Fi Problem",
-  "Student Portal Help",
-  "Talk to Live Agent",
-  "Others"
-];
 
 const feedbackOptions = {
   up: [
@@ -46,7 +36,6 @@ const feedbackOptions = {
     "Helpful Guidance",
     "Fast Reply"
   ],
-
   down: [
     "Not Relevant",
     "Unclear Response",
@@ -58,11 +47,9 @@ const feedbackOptions = {
 
 let selectedFeedbackType = "";
 let selectedFeedbackTags = [];
-
 let sentMessageHistory = [];
 let historyIndex = 0;
-
-
+let responseCounter = 0;
 
 /* =========================
    Notice Bar
@@ -73,8 +60,6 @@ if (noticeClose && noticeBar) {
     noticeBar.style.display = "none";
   });
 }
-
-
 
 /* =========================
    Chat Window
@@ -89,8 +74,6 @@ function closeChatWindow() {
   if (!chatWindow) return;
   chatWindow.classList.remove("open");
 }
-
-
 
 /* =========================
    Chat Utilities
@@ -114,6 +97,8 @@ function removeEndIndicator() {
 }
 
 function addEndIndicator() {
+  if (!chatBody) return;
+
   removeEndIndicator();
 
   const indicator = document.createElement("div");
@@ -156,8 +141,6 @@ function loadNextMessage() {
   }
 }
 
-
-
 /* =========================
    Messages
 ========================= */
@@ -177,7 +160,6 @@ function addMessage(text, sender = "bot") {
   timestamp.textContent = getCurrentTime();
 
   wrapper.append(message, timestamp);
-
   chatBody.appendChild(wrapper);
 
   if (sender === "bot") {
@@ -187,14 +169,132 @@ function addMessage(text, sender = "bot") {
   chatBody.scrollTop = chatBody.scrollHeight;
 }
 
+function addStructuredMessage(data) {
+  removeTypingIndicator();
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "message-wrapper bot";
+
+  const message = document.createElement("div");
+  message.className = "message bot structured-bot-message";
+
+  const responseId = `response-${++responseCounter}`;
+  message.dataset.responseId = responseId;
+
+  const summary = document.createElement("p");
+  summary.className = "bot-summary";
+  summary.textContent =
+    data.summary || data.reply || "Sorry, no reply from server.";
+  message.appendChild(summary);
+
+  const hasDetails =
+    (data.details && data.details.trim()) ||
+    (Array.isArray(data.steps) && data.steps.length) ||
+    (Array.isArray(data.relatedTopics) && data.relatedTopics.length) ||
+    (Array.isArray(data.links) && data.links.length);
+
+  if (hasDetails) {
+    const toggleBtn = document.createElement("button");
+    toggleBtn.type = "button";
+    toggleBtn.className = "bot-details-btn";
+    toggleBtn.dataset.target = responseId;
+    toggleBtn.textContent = "View detailed information";
+    message.appendChild(toggleBtn);
+  }
+
+  const detailBox = document.createElement("div");
+  detailBox.className = "bot-detail-box";
+  detailBox.hidden = true;
+
+  if (data.details && data.details.trim()) {
+    const detailsText = document.createElement("p");
+    detailsText.className = "bot-details-text";
+    detailsText.textContent = data.details;
+    detailBox.appendChild(detailsText);
+  }
+
+  if (Array.isArray(data.steps) && data.steps.length) {
+    const stepsTitle = document.createElement("div");
+    stepsTitle.className = "bot-section-title";
+    stepsTitle.textContent = "Steps";
+    detailBox.appendChild(stepsTitle);
+
+    const stepsList = document.createElement("ol");
+    stepsList.className = "bot-steps-list";
+
+    data.steps.forEach((step) => {
+      const item = document.createElement("li");
+      item.textContent = step;
+      stepsList.appendChild(item);
+    });
+
+    detailBox.appendChild(stepsList);
+  }
+
+  if (Array.isArray(data.links) && data.links.length) {
+    const linksTitle = document.createElement("div");
+    linksTitle.className = "bot-section-title";
+    linksTitle.textContent = "Useful links";
+    detailBox.appendChild(linksTitle);
+
+    const linksWrap = document.createElement("div");
+    linksWrap.className = "bot-links-list";
+
+    data.links.forEach((link) => {
+      if (!link || !link.url) return;
+
+      const a = document.createElement("a");
+      a.className = "bot-link-chip";
+      a.href = link.url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.textContent = link.label || link.url;
+      linksWrap.appendChild(a);
+    });
+
+    detailBox.appendChild(linksWrap);
+  }
+
+  if (Array.isArray(data.relatedTopics) && data.relatedTopics.length) {
+    const relatedTitle = document.createElement("div");
+    relatedTitle.className = "bot-section-title";
+    relatedTitle.textContent = "Related topics";
+    detailBox.appendChild(relatedTitle);
+
+    const relatedWrap = document.createElement("div");
+    relatedWrap.className = "bot-related-topics";
+
+    data.relatedTopics.forEach((topic) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "quick-reply-btn related-topic-btn";
+      btn.dataset.reply = topic;
+      btn.textContent = topic;
+      relatedWrap.appendChild(btn);
+    });
+
+    detailBox.appendChild(relatedWrap);
+  }
+
+  message.appendChild(detailBox);
+
+  const timestamp = document.createElement("div");
+  timestamp.className = "message-time bot";
+  timestamp.textContent = getCurrentTime();
+
+  wrapper.append(message, timestamp);
+  chatBody.appendChild(wrapper);
+
+  addEndIndicator();
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
 function showTypingIndicator() {
   removeTypingIndicator();
   removeEndIndicator();
 
   const typing = document.createElement("div");
-
   typing.className = "typing-indicator";
-
   typing.innerHTML = `
     <span class="typing-bubble">
       UniHelp is typing<span class="typing-dots">...</span>
@@ -202,11 +302,8 @@ function showTypingIndicator() {
   `;
 
   chatBody.appendChild(typing);
-
   chatBody.scrollTop = chatBody.scrollHeight;
 }
-
-
 
 /* =========================
    Quick Replies
@@ -214,33 +311,36 @@ function showTypingIndicator() {
 
 if (chatBody) {
   chatBody.addEventListener("click", async (event) => {
-    const button = event.target.closest(".quick-reply-btn");
-    if (!button) return;
+    const quickReplyButton = event.target.closest(".quick-reply-btn");
+    if (quickReplyButton) {
+      const reply = quickReplyButton.dataset.reply || "";
+      if (!reply.trim()) return;
 
-    await sendUserMessage(button.dataset.reply);
+      storeSentMessage(reply);
+      await sendUserMessage(reply);
+      return;
+    }
+
+    const detailToggle = event.target.closest(".bot-details-btn");
+    if (detailToggle) {
+      const responseId = detailToggle.dataset.target;
+      const parent = chatBody.querySelector(`[data-response-id="${responseId}"]`);
+      const detailBox = parent?.querySelector(".bot-detail-box");
+      if (!detailBox) return;
+
+      const isHidden = detailBox.hidden;
+      detailBox.hidden = !isHidden;
+      detailToggle.textContent = isHidden
+        ? "Hide detailed information"
+        : "View detailed information";
+
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
   });
 }
 
-function renderQuickReplies(replies = []) {
-  const existing = chatBody.querySelector(".quick-replies");
-  if (existing) existing.remove();
-
-  if (!replies.length) return;
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "quick-replies";
-
-  replies.forEach((text) => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "quick-reply-btn";
-    btn.textContent = text;
-    btn.dataset.reply = text;
-    wrapper.appendChild(btn);
-  });
-
-  chatBody.appendChild(wrapper);
-  chatBody.scrollTop = chatBody.scrollHeight;
+function renderQuickReplies() {
+  removeQuickReplies();
 }
 
 function removeQuickReplies() {
@@ -248,13 +348,11 @@ function removeQuickReplies() {
   if (existing) existing.remove();
 }
 
-
 function initializeChat() {
   if (!chatBody) return;
 
   chatBody.innerHTML = "";
   addMessage(initialBotMessage, "bot");
-  renderQuickReplies(initialQuickReplies);
 }
 
 /* =========================
@@ -263,9 +361,9 @@ function initializeChat() {
 
 function restartConversation() {
   sessionId = crypto.randomUUID();
-
   sentMessageHistory = [];
   historyIndex = 0;
+  responseCounter = 0;
 
   removeTypingIndicator();
   removeEndIndicator();
@@ -273,11 +371,16 @@ function restartConversation() {
 
   initializeChat();
 
-  chatInput.disabled = false;
-  chatInput.value = "";
-  chatInput.placeholder = "Type your message...";
-  chatInput.focus();
-  sendBtn.disabled = false;
+  if (chatInput) {
+    chatInput.disabled = false;
+    chatInput.value = "";
+    chatInput.placeholder = "Type your message...";
+    chatInput.focus();
+  }
+
+  if (sendBtn) {
+    sendBtn.disabled = false;
+  }
 
   chatBody.scrollTop = chatBody.scrollHeight;
 }
@@ -309,24 +412,14 @@ async function sendUserMessage(text) {
 
     if (!response.ok) {
       addMessage(data.reply || "Something went wrong.", "bot");
-      renderQuickReplies(initialQuickReplies);
       return;
     }
 
-    addMessage(data.reply || "Sorry, no reply from server.", "bot");
-
-    const repliesToShow =
-      Array.isArray(data.quickReplies) && data.quickReplies.length > 0
-        ? data.quickReplies
-        : initialQuickReplies;
-
-    renderQuickReplies(repliesToShow);
-
+    addStructuredMessage(data);
   } catch (err) {
     console.error("sendUserMessage error:", err);
     removeTypingIndicator();
     addMessage("Error talking to server. Please try again later.", "bot");
-    renderQuickReplies(initialQuickReplies);
   }
 }
 
@@ -348,13 +441,13 @@ async function sendMessage() {
 ========================= */
 
 function renderFeedbackTags(type) {
-  feedbackTags.innerHTML = "";
+  if (!feedbackTags) return;
 
+  feedbackTags.innerHTML = "";
   selectedFeedbackTags = [];
 
   feedbackOptions[type]?.forEach((tagText) => {
     const tag = document.createElement("button");
-
     tag.type = "button";
     tag.className = "feedback-tag";
     tag.textContent = tagText;
@@ -378,18 +471,22 @@ function resetFeedbackModal() {
   selectedFeedbackType = "";
   selectedFeedbackTags = [];
 
-  feedbackText.value = "";
+  if (feedbackText) {
+    feedbackText.value = "";
+  }
 
-  feedbackSuccessMsg.classList.remove("show");
+  if (feedbackSuccessMsg) {
+    feedbackSuccessMsg.classList.remove("show");
+  }
 
   feedbackReactionButtons.forEach((btn) => {
     btn.classList.remove("active");
   });
 
-  feedbackTags.innerHTML = "";
+  if (feedbackTags) {
+    feedbackTags.innerHTML = "";
+  }
 }
-
-
 
 /* =========================
    Theme
@@ -397,7 +494,6 @@ function resetFeedbackModal() {
 
 function applyTheme(theme) {
   const isDark = theme === "dark";
-
   document.body.classList.toggle("dark-mode", isDark);
 
   if (themeIcon) {
@@ -405,22 +501,14 @@ function applyTheme(theme) {
   }
 }
 
-
-
 /* =========================
    Font Size
 ========================= */
 
 function applyFontSizePreference() {
   const saved = localStorage.getItem("fontSizeMode");
-
-  document.body.classList.toggle(
-    "large-text",
-    saved === "large"
-  );
+  document.body.classList.toggle("large-text", saved === "large");
 }
-
-
 
 /* =========================
    End Chat
@@ -429,35 +517,20 @@ function applyFontSizePreference() {
 function endChat() {
   if (!chatBody || !chatInput || !sendBtn) return;
 
-  addMessage(
-    "Chat ended. Thank you for using Ask UniHelp.",
-    "bot"
-  );
+  addMessage("Chat ended. Thank you for using Ask UniHelp.", "bot");
 
   chatInput.disabled = true;
   sendBtn.disabled = true;
-
   chatInput.placeholder = "Chat has ended";
-
-  document
-    .querySelectorAll(".quick-reply-btn")
-    .forEach((button) => {
-      button.disabled = true;
-    });
 }
-
-
 
 /* =========================
    Event Listeners
 ========================= */
 
 chatLauncher?.addEventListener("click", toggleChat);
-
 restartChat?.addEventListener("click", restartConversation);
-
 minimizeChat?.addEventListener("click", closeChatWindow);
-
 sendBtn?.addEventListener("click", sendMessage);
 
 chatInput?.addEventListener("keydown", (event) => {
@@ -502,9 +575,7 @@ feedbackReactionButtons.forEach((button) => {
     });
 
     button.classList.add("active");
-
     selectedFeedbackType = button.dataset.type;
-
     renderFeedbackTags(selectedFeedbackType);
   });
 });
@@ -518,41 +589,30 @@ submitFeedbackBtn?.addEventListener("click", () => {
   console.log("Feedback submitted:", {
     rating: selectedFeedbackType,
     tags: selectedFeedbackTags,
-    comment: feedbackText.value.trim()
+    comment: feedbackText?.value.trim() || ""
   });
 
-  feedbackSuccessMsg.classList.add("show");
+  feedbackSuccessMsg?.classList.add("show");
 
   setTimeout(() => {
-    feedbackModal.classList.remove("show");
+    feedbackModal?.classList.remove("show");
     resetFeedbackModal();
   }, 1200);
 });
 
 themeToggle?.addEventListener("click", () => {
-  const isDark =
-    document.body.classList.contains("dark-mode");
-
+  const isDark = document.body.classList.contains("dark-mode");
   const nextTheme = isDark ? "light" : "dark";
-
   applyTheme(nextTheme);
-
   localStorage.setItem("theme", nextTheme);
 });
 
 fontSizeToggle?.addEventListener("click", () => {
   document.body.classList.toggle("large-text");
 
-  const isLarge =
-    document.body.classList.contains("large-text");
-
-  localStorage.setItem(
-    "fontSizeMode",
-    isLarge ? "large" : "normal"
-  );
+  const isLarge = document.body.classList.contains("large-text");
+  localStorage.setItem("fontSizeMode", isLarge ? "large" : "normal");
 });
-
-
 
 /* =========================
    Initial Load
