@@ -1,4 +1,5 @@
 let sessionId = crypto.randomUUID();
+
 const chatLauncher = document.getElementById("chatLauncher");
 const chatWindow = document.getElementById("chatWindow");
 const restartChat = document.getElementById("restartChat");
@@ -6,6 +7,7 @@ const minimizeChat = document.getElementById("minimizeChat");
 const sendBtn = document.getElementById("sendBtn");
 const chatInput = document.getElementById("chatInput");
 const chatBody = document.getElementById("chatBody");
+const quickReplies = document.getElementById("quickReplies");
 
 const noticeClose = document.querySelector(".notice-close");
 const noticeBar = document.querySelector(".notice-bar");
@@ -27,6 +29,14 @@ const feedbackReactionButtons = document.querySelectorAll(".feedback-reaction");
 
 const initialBotMessage =
   "Hi, I’m UniHelp. I can assist with password reset, portal access, Wi-Fi issues, and common campus enquiries.";
+
+const initialQuickReplies = [
+  "Password Reset",
+  "Wi-Fi Problem",
+  "Student Portal Help",
+  "Talk to Live Agent",
+  "Others"
+];
 
 const feedbackOptions = {
   up: [
@@ -146,6 +156,8 @@ function loadNextMessage() {
 ========================= */
 
 function addMessage(text, sender = "bot") {
+  if (!chatBody) return;
+
   removeTypingIndicator();
 
   const wrapper = document.createElement("div");
@@ -170,6 +182,8 @@ function addMessage(text, sender = "bot") {
 }
 
 function addStructuredMessage(data) {
+  if (!chatBody) return;
+
   removeTypingIndicator();
 
   const wrapper = document.createElement("div");
@@ -290,6 +304,8 @@ function addStructuredMessage(data) {
 }
 
 function showTypingIndicator() {
+  if (!chatBody) return;
+
   removeTypingIndicator();
   removeEndIndicator();
 
@@ -309,43 +325,35 @@ function showTypingIndicator() {
    Quick Replies
 ========================= */
 
-if (chatBody) {
-  chatBody.addEventListener("click", async (event) => {
-    const quickReplyButton = event.target.closest(".quick-reply-btn");
-    if (quickReplyButton) {
-      const reply = quickReplyButton.dataset.reply || "";
-      if (!reply.trim()) return;
+function renderQuickReplies(replies = []) {
+  if (!chatBody || !Array.isArray(replies) || replies.length === 0) return;
 
-      storeSentMessage(reply);
-      await sendUserMessage(reply);
-      return;
-    }
+  const oldQuickReplies = chatBody.querySelector(".quick-replies-wrapper:last-child");
+  if (oldQuickReplies) oldQuickReplies.remove();
 
-    const detailToggle = event.target.closest(".bot-details-btn");
-    if (detailToggle) {
-      const responseId = detailToggle.dataset.target;
-      const parent = chatBody.querySelector(`[data-response-id="${responseId}"]`);
-      const detailBox = parent?.querySelector(".bot-detail-box");
-      if (!detailBox) return;
+  const wrapper = document.createElement("div");
+  wrapper.className = "quick-replies-wrapper bot";
 
-      const isHidden = detailBox.hidden;
-      detailBox.hidden = !isHidden;
-      detailToggle.textContent = isHidden
-        ? "Hide detailed information"
-        : "View detailed information";
+  const repliesContainer = document.createElement("div");
+  repliesContainer.className = "quick-replies";
 
-      chatBody.scrollTop = chatBody.scrollHeight;
-    }
+  replies.forEach((text) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "quick-reply-btn";
+    btn.textContent = text;
+    btn.dataset.reply = text;
+    repliesContainer.appendChild(btn);
   });
+
+  wrapper.appendChild(repliesContainer);
+  chatBody.appendChild(wrapper);
+  chatBody.scrollTop = chatBody.scrollHeight;
 }
 
-function renderQuickReplies() {
-  removeQuickReplies();
-}
-
-function removeQuickReplies() {
-  const existing = chatBody.querySelector(".quick-replies");
-  if (existing) existing.remove();
+function clearQuickReplies() {
+  if (!quickReplies) return;
+  quickReplies.innerHTML = "";
 }
 
 function initializeChat() {
@@ -353,6 +361,7 @@ function initializeChat() {
 
   chatBody.innerHTML = "";
   addMessage(initialBotMessage, "bot");
+  renderQuickReplies(initialQuickReplies);
 }
 
 /* =========================
@@ -367,8 +376,6 @@ function restartConversation() {
 
   removeTypingIndicator();
   removeEndIndicator();
-  removeQuickReplies();
-
   initializeChat();
 
   if (chatInput) {
@@ -392,7 +399,6 @@ function restartConversation() {
 async function sendUserMessage(text) {
   if (!text) return;
 
-  removeQuickReplies();
   removeEndIndicator();
   addMessage(text, "user");
   showTypingIndicator();
@@ -412,14 +418,23 @@ async function sendUserMessage(text) {
 
     if (!response.ok) {
       addMessage(data.reply || "Something went wrong.", "bot");
+      renderQuickReplies(initialQuickReplies);
       return;
     }
 
     addStructuredMessage(data);
+
+    const repliesToShow =
+      Array.isArray(data.quickReplies) && data.quickReplies.length > 0
+        ? data.quickReplies
+        : initialQuickReplies;
+
+    renderQuickReplies(repliesToShow);
   } catch (err) {
     console.error("sendUserMessage error:", err);
     removeTypingIndicator();
     addMessage("Error talking to server. Please try again later.", "bot");
+    renderQuickReplies(initialQuickReplies);
   }
 }
 
@@ -522,6 +537,10 @@ function endChat() {
   chatInput.disabled = true;
   sendBtn.disabled = true;
   chatInput.placeholder = "Chat has ended";
+
+  document.querySelectorAll(".quick-reply-btn").forEach((button) => {
+    button.disabled = true;
+  });
 }
 
 /* =========================
@@ -549,6 +568,36 @@ chatInput?.addEventListener("keydown", (event) => {
   if (event.key === "ArrowDown") {
     event.preventDefault();
     loadNextMessage();
+  }
+});
+
+chatBody?.addEventListener("click", async (event) => {
+  const detailToggle = event.target.closest(".bot-details-btn");
+
+  if (detailToggle) {
+    const responseId = detailToggle.dataset.target;
+    const parent = chatBody.querySelector(`[data-response-id="${responseId}"]`);
+    const detailBox = parent?.querySelector(".bot-detail-box");
+    if (!detailBox) return;
+
+    const isHidden = detailBox.hidden;
+    detailBox.hidden = !isHidden;
+    detailToggle.textContent = isHidden
+      ? "Hide detailed information"
+      : "View detailed information";
+
+    chatBody.scrollTop = chatBody.scrollHeight;
+    return;
+  }
+
+  const quickReplyBtn = event.target.closest(".quick-reply-btn");
+  if (quickReplyBtn) {
+    const reply = quickReplyBtn.dataset.reply || "";
+    if (!reply.trim()) return;
+
+    clearQuickReplies();
+    storeSentMessage(reply);
+    await sendUserMessage(reply);
   }
 });
 

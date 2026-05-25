@@ -247,7 +247,8 @@
   </footer>
 
   <button class="chat-launcher" id="chatLauncher" aria-label="Open chatbot">
-    <img src="{{ url_for('static', filename='images/chatbot-logo.jpg') }}" alt="" class="chat-launcher-img" />
+    <img src="{{ url_for('static', filename='images/chatbot-logo.jpg') }}" alt="Open chatbot"
+      class="chat-launcher-img" />
   </button>
 
   <div class="chat-window" id="chatWindow">
@@ -270,18 +271,11 @@
     <div class="chat-body" id="chatBody">
       <div class="message-wrapper bot">
         <div class="message bot">
-          Hi, I’m UniHelp. I can assist with password reset, portal access, Wi-Fi issues, and common campus enquiries.
+          Hi, I’m UniHelp. I can assist with password reset, portal access,
+          Wi-Fi issues, and common campus enquiries.
         </div>
       </div>
-
       <div class="end-indicator">End of response</div>
-
-      <div class="quick-replies" id="quickReplies">
-        <button type="button" class="quick-reply-btn" data-reply="Password Reset">Password Reset</button>
-        <button type="button" class="quick-reply-btn" data-reply="Wi-Fi Problem">Wi-Fi Problem</button>
-        <button type="button" class="quick-reply-btn" data-reply="Student Portal Help">Student Portal Help</button>
-        <button type="button" class="quick-reply-btn" data-reply="Talk to Live Agent">Talk to Live Agent</button>
-      </div>
     </div>
 
     <div class="chat-input">
@@ -293,19 +287,60 @@
       <button type="button" id="openFeedbackBtn" class="feedback-trigger-btn">
         Rate chat
       </button>
-      <button type="button" class="end-chat-btn" id="endChatBtn">
+      <button type="button" class="end-chat-btn" onclick="endChat()">
         End chat
       </button>
     </div>
   </div>
 
+  <div class="feedback-modal-overlay" id="feedbackModal">
+    <div class="feedback-modal">
+      <div class="feedback-modal-header">
+        <div>
+          <h3>Rate your support experience</h3>
+          <p>Let us know how the chatbot performed.</p>
+        </div>
+
+        <button type="button" class="feedback-close-btn" id="closeFeedbackBtn">✕</button>
+      </div>
+
+      <div class="feedback-modal-body">
+        <div class="feedback-reaction-group">
+          <button type="button" class="feedback-reaction" data-type="up">
+            👍
+            <span>Thumbs Up</span>
+          </button>
+
+          <button type="button" class="feedback-reaction" data-type="down">
+            👎
+            <span>Thumbs Down</span>
+          </button>
+        </div>
+
+        <div class="feedback-tag-section">
+          <p class="feedback-section-label">What best describes your experience?</p>
+          <div class="feedback-tags" id="feedbackTags"></div>
+        </div>
+
+        <div class="feedback-text-section">
+          <label for="feedbackText" class="feedback-section-label">
+            Additional comments
+          </label>
+          <textarea id="feedbackText" rows="4" placeholder="Tell us more about your experience..."></textarea>
+        </div>
+
+        <button type="button" id="submitFeedbackBtn" class="feedback-submit-btn">
+          Submit Feedback
+        </button>
+
+        <p class="feedback-success-msg" id="feedbackSuccessMsg">
+          Thank you for your feedback!
+        </p>
+      </div>
+    </div>
+  </div>
+
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-  <script>
-    const endChatBtn = document.getElementById("endChatBtn");
-    if (endChatBtn && typeof endChat === "function") {
-      endChatBtn.addEventListener("click", endChat);
-    }
-  </script>
 </body>
 
 </html>

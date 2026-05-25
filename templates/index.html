@@ -7,15 +7,11 @@
 
   <title>Excellence University | Home</title>
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Icons used in footer social links -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-
-  <!-- Main stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
@@ -267,7 +263,6 @@
 
       <div class="footer-col">
         <h4>Explore</h4>
-
         <ul class="footer-links">
           <li><a href="#">Admissions</a></li>
           <li><a href="#">Academic Programmes</a></li>
@@ -278,7 +273,6 @@
 
       <div class="footer-col">
         <h4>Support</h4>
-
         <ul class="footer-links">
           <li><a href="support.html">Contact Us</a></li>
         </ul>
@@ -291,24 +285,16 @@
           <a href="https://x.com/" class="social-icon" aria-label="X" target="_blank" rel="noopener noreferrer">
             <i class="fa-brands fa-x-twitter"></i>
           </a>
-
-          <a href="https://youtube.com/" class="social-icon" aria-label="YouTube" target="_blank"
-            rel="noopener noreferrer">
+          <a href="https://youtube.com/" class="social-icon" aria-label="YouTube" target="_blank" rel="noopener noreferrer">
             <i class="fa-brands fa-youtube"></i>
           </a>
-
-          <a href="https://tiktok.com/" class="social-icon" aria-label="TikTok" target="_blank"
-            rel="noopener noreferrer">
+          <a href="https://tiktok.com/" class="social-icon" aria-label="TikTok" target="_blank" rel="noopener noreferrer">
             <i class="fa-brands fa-tiktok"></i>
           </a>
-
-          <a href="https://instagram.com/" class="social-icon" aria-label="Instagram" target="_blank"
-            rel="noopener noreferrer">
+          <a href="https://instagram.com/" class="social-icon" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
             <i class="fa-brands fa-instagram"></i>
           </a>
-
-          <a href="https://web.telegram.org/" class="social-icon" aria-label="Telegram" target="_blank"
-            rel="noopener noreferrer">
+          <a href="https://web.telegram.org/" class="social-icon" aria-label="Telegram" target="_blank" rel="noopener noreferrer">
             <i class="fa-brands fa-telegram"></i>
           </a>
         </div>
@@ -331,7 +317,6 @@
       <div class="chat-header-left">
         <img src="{{ url_for('static', filename='images/chatbot-logo.jpg') }}" alt="Chatbot Logo"
           class="chat-avatar-img" />
-
         <div>
           <strong>Ask UniHelp</strong>
           <p>Virtual Helpdesk Assistant</p>
@@ -339,13 +324,8 @@
       </div>
 
       <div class="chat-controls">
-        <button id="restartChat" type="button" aria-label="Restart conversation">
-          ↺
-        </button>
-
-        <button id="minimizeChat" type="button" aria-label="Minimize chat">
-          —
-        </button>
+        <button id="restartChat" type="button" aria-label="Restart conversation">↺</button>
+        <button id="minimizeChat" type="button" aria-label="Minimize chat">—</button>
       </div>
     </div>
 
@@ -356,7 +336,6 @@
           Wi-Fi issues, and common campus enquiries.
         </div>
       </div>
-
       <div class="end-indicator">End of response</div>
     </div>
 
@@ -369,7 +348,6 @@
       <button type="button" id="openFeedbackBtn" class="feedback-trigger-btn">
         Rate chat
       </button>
-
       <button type="button" class="end-chat-btn" onclick="endChat()">
         End chat
       </button>
@@ -384,9 +362,7 @@
           <p>Let us know how the chatbot performed.</p>
         </div>
 
-        <button type="button" class="feedback-close-btn" id="closeFeedbackBtn">
-          ✕
-        </button>
+        <button type="button" class="feedback-close-btn" id="closeFeedbackBtn">✕</button>
       </div>
 
       <div class="feedback-modal-body">
@@ -403,10 +379,7 @@
         </div>
 
         <div class="feedback-tag-section">
-          <p class="feedback-section-label">
-            What best describes your experience?
-          </p>
-
+          <p class="feedback-section-label">What best describes your experience?</p>
           <div class="feedback-tags" id="feedbackTags"></div>
         </div>
 
@@ -414,7 +387,6 @@
           <label for="feedbackText" class="feedback-section-label">
             Additional comments
           </label>
-
           <textarea id="feedbackText" rows="4" placeholder="Tell us more about your experience..."></textarea>
         </div>
 

@@ -78,7 +78,7 @@ def get_faq_content(intent_name):
     url = f"{supabase_url}/rest/v1/faq"
     params = {
         "intent": f"eq.{intent_name}",
-        "select": "id,intent,answer,summary,details,steps,related_topics,links,quick_replies",
+        "select": "id,intent,answer,summary,details,steps,related_topics,links",
         "limit": 1
     }
 
@@ -179,7 +179,6 @@ def insert_faq_answer(
     steps=None,
     related_topics=None,
     links=None,
-    quick_replies=None
 ):
     url = f"{supabase_url}/rest/v1/faq"
     payload = {
@@ -190,7 +189,6 @@ def insert_faq_answer(
         "steps": steps or [],
         "related_topics": related_topics or [],
         "links": links or [],
-        "quick_replies": quick_replies or []
     }
 
     response = requests.post(
@@ -280,7 +278,7 @@ def chat():
             steps = faq.get("steps") or []
             related_topics = faq.get("related_topics") or []
             links = faq.get("links") or []
-            quick_replies = faq.get("quick_replies") or get_quick_replies(intent_name)
+            quick_replies = get_quick_replies(intent_name)
 
             return jsonify({
                 "reply": faq.get("answer") or summary,
@@ -326,7 +324,6 @@ def create_full_faq():
     steps = data.get("steps", [])
     related_topics = data.get("relatedTopics", [])
     links = data.get("links", [])
-    quick_replies = data.get("quickReplies", [])
 
     if not intent or not answer:
         return jsonify({"error": "Intent name and answer are required."}), 400
@@ -354,7 +351,6 @@ def create_full_faq():
             steps=steps,
             related_topics=related_topics,
             links=links,
-            quick_replies=quick_replies
         )
 
         return jsonify({
@@ -372,7 +368,7 @@ def get_faqs():
     try:
         url = f"{supabase_url}/rest/v1/faq"
         params = {
-            "select": "id,intent,answer,summary,details,steps,related_topics,links,quick_replies",
+            "select": "id,intent,answer,summary,details,steps,related_topics,links",
             "order": "id.asc"
         }
 
@@ -394,7 +390,7 @@ def get_faq_detail(faq_id):
         url = f"{supabase_url}/rest/v1/faq"
         params = {
             "id": f"eq.{faq_id}",
-            "select": "id,intent,answer,summary,details,steps,related_topics,links,quick_replies",
+            "select": "id,intent,answer,summary,details,steps,related_topics,links",
             "limit": 1
         }
 
@@ -441,7 +437,6 @@ def get_faq_detail(faq_id):
                 "steps": faq.get("steps") or [],
                 "related_topics": faq.get("related_topics") or [],
                 "links": faq.get("links") or [],
-                "quick_replies": faq.get("quick_replies") or [],
                 "trainingPhrases": training_phrases
             }
         }), 200
@@ -461,7 +456,6 @@ def update_faq(faq_id):
     steps = data.get("steps", [])
     related_topics = data.get("relatedTopics", [])
     links = data.get("links", [])
-    quick_replies = data.get("quickReplies", [])
     training_phrases = [
         phrase.strip()
         for phrase in data.get("trainingPhrases", [])
@@ -482,7 +476,7 @@ def update_faq(faq_id):
             headers=supabase_headers({"Prefer": "return=representation"}),
             params={
                 "id": f"eq.{faq_id}",
-                "select": "id,intent,answer,summary,details,steps,related_topics,links,quick_replies",
+                "select": "id,intent,answer,summary,details,steps,related_topics,links",
                 "limit": 1
             }
         )
@@ -512,8 +506,7 @@ def update_faq(faq_id):
                 "details": details,
                 "steps": steps,
                 "related_topics": related_topics,
-                "links": links,
-                "quick_replies": quick_replies
+                "links": links
             }
         )
 
