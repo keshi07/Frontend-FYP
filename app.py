@@ -78,7 +78,7 @@ def get_faq_content(intent_name):
     url = f"{supabase_url}/rest/v1/faq"
     params = {
         "intent": f"eq.{intent_name}",
-        "select": "id,intent,answer,summary,details,steps,related_topics,links",
+        "select": "id,intent,display_name,answer,summary,details,steps,related_topics,links",
         "limit": 1
     }
 
@@ -174,6 +174,7 @@ def create_dialogflow_intent(display_name, training_phrases):
 def insert_faq_answer(
     intent_name,
     answer,
+    display_name=None,
     summary=None,
     details=None,
     steps=None,
@@ -183,6 +184,7 @@ def insert_faq_answer(
     url = f"{supabase_url}/rest/v1/faq"
     payload = {
         "intent": intent_name,
+        "display_name": display_name,
         "answer": answer,
         "summary": summary,
         "details": details,
@@ -253,12 +255,45 @@ def update_dialogflow_intent(original_intent_name, new_intent_name, training_phr
 
     return updated_intent
 
+def get_related_topic_objects(intent_names):
+    if not intent_names:
+        return []
+
+    cleaned = [name.strip() for name in intent_names if isinstance(name, str) and name.strip()]
+    if not cleaned:
+        return []
+
+    url = f"{supabase_url}/rest/v1/faq"
+    quoted = ",".join([f'"{name}"' for name in cleaned])
+    params = {
+        "select": "intent,display_name",
+        "intent": f"in.({quoted})"
+    }
+
+    resp = requests.get(url, headers=supabase_headers(), params=params)
+    resp.raise_for_status()
+    rows = resp.json()
+
+    label_map = {
+        row["intent"]: (row.get("display_name") or row["intent"])
+        for row in rows
+    }
+
+    return [
+        {
+            "intent": name,
+            "label": label_map.get(name, name)
+        }
+        for name in cleaned
+    ]
+
 
 @app.route("/api/chat", methods=["POST"])
 def chat():
     data = request.get_json()
     user_text = data.get("message", "").strip()
     session_id = data.get("sessionId", "").strip()
+    is_intent_selection = data.get("isIntentSelection", False)
 
     if not user_text:
         return jsonify({"reply": "Please type a message."}), 400
@@ -267,16 +302,24 @@ def chat():
         return jsonify({"reply": "Missing session ID."}), 400
 
     try:
-        df_result = detect_intent_text(user_text, session_id)
-        intent_name = df_result["intent"]
-
-        faq = get_faq_content(intent_name)
+        if is_intent_selection:
+            intent_name = user_text
+            faq = get_faq_content(intent_name)
+            df_result = {
+                "intent": intent_name,
+                "reply": faq.get("answer") if faq else ""
+            }
+        else:
+            df_result = detect_intent_text(user_text, session_id)
+            intent_name = df_result["intent"]
+            faq = get_faq_content(intent_name)
 
         if faq:
             summary = faq.get("summary") or faq.get("answer") or df_result["reply"] or "Sorry, I couldn't find a matching answer."
             details = faq.get("details") or ""
             steps = faq.get("steps") or []
             related_topics = faq.get("related_topics") or []
+            related_topic_objects = get_related_topic_objects(related_topics)
             links = faq.get("links") or []
             quick_replies = get_quick_replies(intent_name)
 
@@ -285,14 +328,23 @@ def chat():
                 "summary": summary,
                 "details": details,
                 "steps": steps,
-                "relatedTopics": related_topics,
+                "relatedTopics": related_topic_objects,
                 "links": links,
                 "quickReplies": quick_replies,
                 "intent": intent_name,
+                "displayName": faq.get("display_name") or intent_name,
                 "sessionId": session_id
             })
 
         fallback_reply = df_result["reply"] or "Sorry, I couldn't find a matching answer."
+
+        fallback_quick_replies = get_quick_replies(intent_name) or [
+            "Password Reset",
+            "Wi-Fi Problem",
+            "Student Portal Help",
+            "Talk to Live Agent",
+            "Others"
+        ]
 
         return jsonify({
             "reply": fallback_reply,
@@ -301,12 +353,14 @@ def chat():
             "steps": [],
             "relatedTopics": [],
             "links": [],
-            "quickReplies": get_quick_replies(intent_name),
+            "quickReplies": fallback_quick_replies,
             "intent": intent_name,
+            "displayName": intent_name,
             "sessionId": session_id
         })
 
-    except Exception:
+    except Exception as e:
+        print("Chat error:", str(e))
         return jsonify({
             "reply": "Sorry, the chatbot is temporarily unavailable. Please try again later."
         }), 500
@@ -319,6 +373,7 @@ def create_full_faq():
     intent = data.get("intent", "").strip()
     training_phrases = data.get("trainingPhrases", [])
     answer = data.get("answer", "").strip()
+    display_name = data.get("displayName", "").strip()
     summary = data.get("summary", "").strip()
     details = data.get("details", "").strip()
     steps = data.get("steps", [])
@@ -346,6 +401,7 @@ def create_full_faq():
         created_faq = insert_faq_answer(
             intent_name=intent,
             answer=answer,
+             display_name=display_name or None,
             summary=summary or answer,
             details=details,
             steps=steps,
@@ -368,7 +424,7 @@ def get_faqs():
     try:
         url = f"{supabase_url}/rest/v1/faq"
         params = {
-            "select": "id,intent,answer,summary,details,steps,related_topics,links",
+            "select": "id,intent,display_name,answer,summary,details,steps,related_topics,links",
             "order": "id.asc"
         }
 
@@ -390,7 +446,7 @@ def get_faq_detail(faq_id):
         url = f"{supabase_url}/rest/v1/faq"
         params = {
             "id": f"eq.{faq_id}",
-            "select": "id,intent,answer,summary,details,steps,related_topics,links",
+            "select": "id,intent,display_name,answer,summary,details,steps,related_topics,links",
             "limit": 1
         }
 
@@ -432,6 +488,7 @@ def get_faq_detail(faq_id):
                 "id": faq["id"],
                 "intent": faq["intent"],
                 "answer": faq.get("answer"),
+                "display_name": faq.get("display_name"),
                 "summary": faq.get("summary"),
                 "details": faq.get("details"),
                 "steps": faq.get("steps") or [],
@@ -451,6 +508,7 @@ def update_faq(faq_id):
 
     intent = data.get("intent", "").strip()
     answer = data.get("answer", "").strip()
+    display_name = data.get("displayName", "").strip()
     summary = data.get("summary", "").strip()
     details = data.get("details", "").strip()
     steps = data.get("steps", [])
@@ -476,7 +534,7 @@ def update_faq(faq_id):
             headers=supabase_headers({"Prefer": "return=representation"}),
             params={
                 "id": f"eq.{faq_id}",
-                "select": "id,intent,answer,summary,details,steps,related_topics,links",
+                "select": "id,intent,display_name,answer,summary,details,steps,related_topics,links",
                 "limit": 1
             }
         )
@@ -502,6 +560,7 @@ def update_faq(faq_id):
             json={
                 "intent": intent,
                 "answer": answer,
+                "display_name": display_name or None,
                 "summary": summary or answer,
                 "details": details,
                 "steps": steps,

@@ -279,14 +279,16 @@ function addStructuredMessage(data) {
     relatedWrap.className = "bot-related-topics";
 
     data.relatedTopics.forEach((topic) => {
+      if (!topic || !topic.intent) return;
+
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "quick-reply-btn related-topic-btn";
-      btn.dataset.reply = topic;
-      btn.textContent = topic;
+      btn.dataset.reply = topic.intent;
+      btn.dataset.label = topic.label || topic.intent;
+      btn.textContent = topic.label || topic.intent;
       relatedWrap.appendChild(btn);
     });
-
     detailBox.appendChild(relatedWrap);
   }
 
@@ -396,11 +398,11 @@ function restartConversation() {
    Send Message
 ========================= */
 
-async function sendUserMessage(text) {
+async function sendUserMessage(text, isIntentSelection = false, displayText = null) {
   if (!text) return;
 
   removeEndIndicator();
-  addMessage(text, "user");
+  addMessage(displayText || text, "user");
   showTypingIndicator();
 
   try {
@@ -409,7 +411,8 @@ async function sendUserMessage(text) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message: text,
-        sessionId: sessionId
+        sessionId: sessionId,
+        isIntentSelection: isIntentSelection
       })
     });
 
@@ -590,6 +593,18 @@ chatBody?.addEventListener("click", async (event) => {
     return;
   }
 
+  const relatedTopicBtn = event.target.closest(".related-topic-btn");
+  if (relatedTopicBtn) {
+    const reply = relatedTopicBtn.dataset.reply || "";
+    const label = relatedTopicBtn.dataset.label || reply;
+    if (!reply.trim()) return;
+
+    clearQuickReplies();
+    storeSentMessage(label);
+    await sendUserMessage(reply, true, label);
+    return;
+  }
+
   const quickReplyBtn = event.target.closest(".quick-reply-btn");
   if (quickReplyBtn) {
     const reply = quickReplyBtn.dataset.reply || "";
@@ -597,7 +612,8 @@ chatBody?.addEventListener("click", async (event) => {
 
     clearQuickReplies();
     storeSentMessage(reply);
-    await sendUserMessage(reply);
+    await sendUserMessage(reply, false, reply);
+
   }
 });
 
