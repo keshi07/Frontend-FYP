@@ -74,8 +74,8 @@
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Intent</th>
-                <th>Answer</th>
+                <th>Display Name</th>
+                <th>Summary</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -103,23 +103,66 @@
             <input type="hidden" id="faqId" />
 
             <div class="form-group">
-              <label for="faqIntent">Intent Name</label>
-              <input type="text" id="faqIntent" placeholder="e.g. ask_payment_methods" required />
+              <label for="faqDisplayName">
+                Display Name <span class="required-asterisk" aria-hidden="true">*</span>
+              </label>
+              <input type="text" id="faqDisplayName" placeholder="e.g. Graduation Requirements" required
+                aria-required="true" />
             </div>
 
             <div class="form-group">
-              <label for="faqTrainingPhrases">Training Phrases</label>
-              <textarea id="faqTrainingPhrases" rows="6"
-                placeholder="Enter one training phrase per line&#10;e.g.&#10;I lost my student card&#10;replace student card&#10;student card replacement"
-                required></textarea>
-              <small class="form-help-text">
-                Enter one phrase per line. These will be used to create the Dialogflow intent.
-              </small>
+              <label for="faqIntent">
+                Intent Name <span class="required-asterisk" aria-hidden="true">*</span>
+              </label>
+              <input type="text" id="faqIntent" placeholder="e.g. ask_graduation_requirements" required
+                aria-required="true" />
             </div>
 
             <div class="form-group">
-              <label for="faqAnswer">Answer</label>
-              <textarea id="faqAnswer" rows="6" placeholder="Enter FAQ answer" required></textarea>
+              <label for="faqTrainingPhrases">
+                Training Phrases <span class="required-asterisk" aria-hidden="true">*</span>
+              </label>
+              <textarea id="faqTrainingPhrases" rows="6" placeholder="Enter one training phrase per line" required
+                aria-required="true"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="faqAnswer">
+                Answer <span class="required-asterisk" aria-hidden="true">*</span>
+              </label>
+              <textarea id="faqAnswer" rows="5" placeholder="Short main answer shown to users" required
+                aria-required="true"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="faqSummary">Summary</label>
+              <textarea id="faqSummary" rows="3"
+                placeholder="Short summary for the FAQ table or chatbot preview"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="faqDetails">Details</label>
+              <textarea id="faqDetails" rows="5" placeholder="Extra explanation or supporting details"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="faqSteps">Steps</label>
+              <textarea id="faqSteps" rows="4"
+                placeholder="Enter one step per line&#10;e.g.&#10;Log in to the student portal&#10;Open the graduation section&#10;Submit your application"></textarea>
+
+            </div>
+
+            <div class="form-group">
+              <label for="faqRelatedTopics">Related Topics</label>
+              <textarea id="faqRelatedTopics" rows="4"
+                placeholder="Enter one related topic per line&#10;e.g.&#10;ask_admission_info&#10;ask_course_transfer"></textarea>
+
+            </div>
+
+            <div class="form-group">
+              <label for="faqLinks">Links</label>
+              <textarea id="faqLinks" rows="4"
+                placeholder="Enter one link per line&#10;e.g.&#10;Graduation Guide | https://example.com/graduation&#10;Portal | https://example.com/portal"></textarea>
             </div>
 
             <div class="admin-item-actions">

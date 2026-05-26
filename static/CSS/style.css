@@ -2052,10 +2052,11 @@ body.dark-mode .admin-faq-table td {
 .faq-modal {
   position: fixed;
   inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  z-index: 2001;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 
 .faq-modal[hidden],
@@ -2064,20 +2065,24 @@ body.dark-mode .admin-faq-table td {
 }
 
 .faq-modal-content {
-  width: min(100%, 680px);
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: var(--shadow-lg);
-  padding: 20px;
+  width: 100%;
+  max-width: 720px;
+  max-height: calc(100vh - 40px);
+  background: #ffffff;
+  border-radius: 22px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .faq-modal-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 18px;
+  padding: 22px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 .faq-modal-header h3 {
@@ -2095,9 +2100,10 @@ body.dark-mode .admin-faq-table td {
 }
 
 .faq-form {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  scrollbar-gutter: stable;
+  padding: 20px 24px 24px;
+  overflow-y: auto;
+  max-height: calc(100vh - 120px);
 }
 
 .faq-form .form-group {
@@ -2115,11 +2121,50 @@ body.dark-mode .admin-faq-table td {
   background: var(--white);
   color: var(--text);
   outline: none;
+  margin-bottom: 25px;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .faq-form textarea {
   resize: vertical;
   min-height: 140px;
+}
+
+.form-required-note {
+  margin: 0 0 16px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.required-asterisk {
+  color: #dc2626;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+.faq-form label {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.faq-form input::placeholder,
+.faq-form textarea::placeholder {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  opacity: 1;
+}
+
+#faqSearchInput {
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+#faqSearchInput::placeholder {
+  font-size: 0.90rem;
+  color: var(--muted);
+  opacity: 0.85;
 }
 
 body.dark-mode .faq-modal-content {
@@ -2134,11 +2179,6 @@ body.dark-mode .faq-form textarea {
   border-color: var(--border);
 }
 
-.form-help-text {
-  display: block;
-  margin-top: 6px;
-  color: var(--muted);
-}
 
 .toast-container {
   position: fixed;

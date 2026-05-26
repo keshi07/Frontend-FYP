@@ -9,6 +9,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const faqIntent = document.getElementById("faqIntent");
   const faqTrainingPhrases = document.getElementById("faqTrainingPhrases");
   const faqAnswer = document.getElementById("faqAnswer");
+  const faqDisplayName = document.getElementById("faqDisplayName");
+  const faqSummary = document.getElementById("faqSummary");
+  const faqDetails = document.getElementById("faqDetails");
+  const faqSteps = document.getElementById("faqSteps");
+  const faqRelatedTopics = document.getElementById("faqRelatedTopics");
+  const faqLinks = document.getElementById("faqLinks");
   const faqTableBody = document.getElementById("faqTableBody");
   const refreshFaqBtn = document.getElementById("refreshFaqBtn");
   const toastContainer = document.getElementById("toastContainer");
@@ -19,6 +25,42 @@ document.addEventListener("DOMContentLoaded", () => {
   let faqFormMode = "add";
   let editingFaqId = null;
   let lastFocusedElement = null;
+
+
+  function parseLines(value = "") {
+    return value
+      .split(/\r?\n/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  function parseLinks(value = "") {
+    return value
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [label, url] = line.split("|").map((part) => part.trim());
+        if (!url) {
+          return { label: line, url: line };
+        }
+        return { label, url };
+      })
+      .filter((link) => link.url);
+  }
+
+  function formatLinks(links = []) {
+    return links
+      .map((link) => {
+        if (!link) return "";
+        const label = (link.label || "").trim();
+        const url = (link.url || "").trim();
+        if (!url) return "";
+        return label ? `${label} | ${url}` : url;
+      })
+      .filter(Boolean)
+      .join("\n");
+  }
 
   function renderFaqTable(faqs) {
     if (!faqTableBody) return;
@@ -34,30 +76,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     faqTableBody.innerHTML = faqs
       .map((faq, index) => {
-        const rowId = faq.id ?? index + 1;
-        const safeIntent = faq.intent || "";
-        const safeAnswer = faq.answer || "";
+        const displayIndex = index + 1;
+        const actualId = faq.id;
+        const safeDisplayName = faq.display_name || "";
+        const safeSummary = faq.summary || faq.answer || "";
 
         return `
         <tr>
-          <td>${rowId}</td>
-          <td>${safeIntent || "-"}</td>
-          <td>${safeAnswer || "-"}</td>
+          <td>${displayIndex}</td>
+          <td>${safeDisplayName || "-"}</td>
+          <td>${safeSummary || "-"}</td>
           <td>
             <button
               type="button"
               class="admin-secondary-btn faq-edit-btn"
-              data-id="${rowId}"
-              data-intent="${safeIntent}"
-              data-answer="${safeAnswer.replace(/"/g, "&quot;")}"
+              data-id="${actualId}"
             >
               Edit
             </button>
             <button
               type="button"
               class="admin-secondary-btn faq-delete-btn"
-              data-id="${rowId}"
-              data-intent="${safeIntent}"
+              data-id="${actualId}"
             >
               Delete
             </button>
@@ -83,53 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 3500);
   }
 
-  function renderFaqTable(faqs) {
-    if (!faqTableBody) return;
 
-    if (faqs.length === 0) {
-      faqTableBody.innerHTML = `
-      <tr>
-        <td colspan="4">No FAQs found.</td>
-      </tr>
-    `;
-      return;
-    }
-
-    faqTableBody.innerHTML = faqs
-      .map((faq, index) => {
-        const rowId = faq.id ?? index + 1;
-        const safeIntent = faq.intent || "";
-        const safeAnswer = faq.answer || "";
-
-        return `
-        <tr>
-          <td>${rowId}</td>
-          <td>${safeIntent || "-"}</td>
-          <td>${safeAnswer || "-"}</td>
-          <td>
-            <button
-              type="button"
-              class="admin-secondary-btn faq-edit-btn"
-              data-id="${rowId}"
-              data-intent="${safeIntent}"
-              data-answer="${safeAnswer.replace(/"/g, "&quot;")}"
-            >
-              Edit
-            </button>
-            <button
-              type="button"
-              class="admin-secondary-btn faq-delete-btn"
-              data-id="${rowId}"
-              data-intent="${safeIntent}"
-            >
-              Delete
-            </button>
-          </td>
-        </tr>
-      `;
-      })
-      .join("");
-  }
 
   async function loadFaqs() {
     if (!faqTableBody) return;
@@ -216,10 +210,20 @@ document.addEventListener("DOMContentLoaded", () => {
       .map((phrase) => phrase.trim())
       .filter(Boolean);
 
+    const steps = parseLines(faqSteps?.value || "");
+    const relatedTopics = parseLines(faqRelatedTopics?.value || "");
+    const links = parseLinks(faqLinks?.value || "");
+
     const payload = {
       intent: faqIntent.value.trim(),
+      displayName: faqDisplayName?.value.trim() || "",
       trainingPhrases,
-      answer: faqAnswer.value.trim()
+      answer: faqAnswer.value.trim(),
+      summary: faqSummary?.value.trim() || "",
+      details: faqDetails?.value.trim() || "",
+      steps,
+      relatedTopics,
+      links
     };
 
     if (!payload.intent || !payload.answer) {
@@ -243,8 +247,14 @@ document.addEventListener("DOMContentLoaded", () => {
           },
           body: JSON.stringify({
             intent: payload.intent,
+            displayName: payload.displayName,
             trainingPhrases: payload.trainingPhrases,
-            answer: payload.answer
+            answer: payload.answer,
+            summary: payload.summary,
+            details: payload.details,
+            steps: payload.steps,
+            relatedTopics: payload.relatedTopics,
+            links: payload.links
           })
         });
       } else {
@@ -297,8 +307,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const faq = result.faq;
         editingFaqId = faq.id;
         faqIntent.value = faq.intent || "";
+        faqDisplayName.value = faq.display_name || "";
         faqAnswer.value = faq.answer || "";
+        faqSummary.value = faq.summary || "";
+        faqDetails.value = faq.details || "";
         faqTrainingPhrases.value = (faq.trainingPhrases || []).join("\n");
+        faqSteps.value = (faq.steps || []).join("\n");
+        faqRelatedTopics.value = (faq.related_topics || []).join("\n");
+        faqLinks.value = formatLinks(faq.links || []);
 
         openFaqModal("edit");
       } catch (error) {
@@ -347,8 +363,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const filteredFaqs = allFaqs.filter((faq) => {
       const intent = (faq.intent || "").toLowerCase();
+      const displayName = (faq.display_name || "").toLowerCase();
       const answer = (faq.answer || "").toLowerCase();
-      return intent.includes(keyword) || answer.includes(keyword);
+      const summary = (faq.summary || "").toLowerCase();
+
+      return (
+        intent.includes(keyword) ||
+        displayName.includes(keyword) ||
+        answer.includes(keyword) ||
+        summary.includes(keyword)
+      );
     });
 
     renderFaqTable(filteredFaqs);
