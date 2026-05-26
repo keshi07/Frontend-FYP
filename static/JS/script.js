@@ -33,7 +33,7 @@ const initialBotMessage =
 const initialQuickReplies = [
   "Password Reset",
   "Wi-Fi Problem",
-  "Student Portal Help",
+  "Student Portal",
   "Talk to Live Agent",
   "Others"
 ];

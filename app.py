@@ -121,33 +121,12 @@ def get_quick_replies(intent_name):
             "Lost/Stolen",
             "Damaged"
         ],
-        "student_card_replacement.damaged": [
-            "Operating Hours",
-            "Location"
-        ],
         "operating_hours": [
             "Library",
             "Student Services",
             "IT Helpdesk"
-        ],
-        "wifi_issue": [
-            "Windows Laptop",
-            "MacBook",
-            "Mobile Device"
-        ],
-        "tuition_fee_payment": [
-            "Credit Card",
-            "PayNow",
-            "GIRO"
-        ],
-        "tuition_fee_payment.installment_plan": [
-            "Yes",
-            "No"
-        ],
-        "course_transfer": [
-            "Local Student",
-            "International Student"
         ]
+        
     }
     return quick_reply_map.get(intent_name, [])
 
