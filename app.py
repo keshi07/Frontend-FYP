@@ -108,6 +108,31 @@ def get_user_profile(user_id):
     return None
 
 
+
+def create_support_ticket(session_id, user_message):
+    import uuid
+
+    ticket_id = f"TKT-{str(uuid.uuid4())[:8]}"
+
+    url = f"{supabase_url}/rest/v1/support_tickets"
+
+    payload = {
+        "ticket_id": ticket_id,
+        "session_id": session_id,
+        "user_message": user_message,
+        "status": "Open"
+    }
+
+    response = requests.post(
+        url,
+        headers=supabase_headers({"Prefer": "return=representation"}),
+        json=payload
+    )
+
+    response.raise_for_status()
+
+    return ticket_id
+
 def get_quick_replies(intent_name):
     quick_reply_map = {
         "Default Welcome Intent": [
@@ -279,6 +304,37 @@ def chat():
 
     if not session_id:
         return jsonify({"reply": "Missing session ID."}), 400
+    escalation_phrases = [
+        "talk to live agent",
+        "talk to human",
+        "speak to human",
+        "customer service",
+        "live support",
+        "contact support",
+        "agent",
+        "human"
+    ]
+
+    if user_text.lower() in escalation_phrases:
+
+        ticket_id = create_support_ticket(
+            session_id,
+            user_text
+        )
+
+        return jsonify({
+            "reply": f"Your support ticket {ticket_id} has been created and transferred to a Customer Service Officer.",
+            "summary": f"Ticket {ticket_id} created successfully.",
+            "details": "A CSO will review your request and respond shortly.",
+            "steps": [],
+            "relatedTopics": [],
+            "links": [],
+            "quickReplies": [],
+            "intent": "LiveAgentEscalation",
+            "displayName": "Live Agent Escalation",
+            "sessionId": session_id
+        })
+
 
     try:
         if is_intent_selection:
@@ -626,6 +682,53 @@ def delete_faq(faq_id):
 
     except Exception as e:
         return jsonify({"error": f"Failed to delete FAQ: {str(e)}"}), 500
+
+
+@app.route("/api/tickets", methods=["GET"])
+def get_tickets():
+
+    url = f"{supabase_url}/rest/v1/support_tickets"
+
+    response = requests.get(
+        url,
+        headers=supabase_headers(),
+        params={
+            "select": "*",
+            "order": "created_at.desc"
+        }
+    )
+
+    response.raise_for_status()
+
+    return jsonify(response.json())
+
+
+@app.route("/api/tickets/<ticket_id>/reply", methods=["PUT"])
+def reply_ticket(ticket_id):
+
+    data = request.get_json()
+    response_text = data.get("response", "")
+
+    url = f"{supabase_url}/rest/v1/support_tickets"
+
+    response = requests.patch(
+        url,
+        headers=supabase_headers({"Prefer": "return=representation"}),
+        params={
+            "ticket_id": f"eq.{ticket_id}"
+        },
+        json={
+            "status": "Resolved",
+            "cso_response": response_text
+        }
+    )
+
+    response.raise_for_status()
+
+    return jsonify({
+        "message": "Ticket updated successfully"
+    })
+
 
 
 if __name__ == "__main__":

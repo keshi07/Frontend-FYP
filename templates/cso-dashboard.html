@@ -72,50 +72,7 @@
           <h2>Assigned Cases</h2>
         </div>
 
-        <div class="admin-item-list">
-          <article class="admin-item-card">
-            <div class="admin-item-top">
-              <div>
-                <h3>Wi-Fi Connection Issue</h3>
-                <p>Student cannot connect to campus Wi-Fi after password reset.</p>
-              </div>
-              <span class="admin-status-badge flagged">High</span>
-            </div>
-
-            <div class="admin-item-meta">
-              <span><strong>Topic:</strong> IT Support</span>
-              <span><strong>Escalated:</strong> 10:12 AM</span>
-              <span><strong>Last Message:</strong> 10:15 AM</span>
-            </div>
-
-            <div class="admin-item-actions">
-              <button class="admin-primary-btn">Open Chat</button>
-              <button class="admin-secondary-btn">Use Template</button>
-              <button class="admin-secondary-btn">Mark Resolved</button>
-            </div>
-          </article>
-
-          <article class="admin-item-card">
-            <div class="admin-item-top">
-              <div>
-                <h3>Portal Login Problem</h3>
-                <p>User unable to access student portal after multiple login attempts.</p>
-              </div>
-              <span class="admin-status-badge draft">Medium</span>
-            </div>
-
-            <div class="admin-item-meta">
-              <span><strong>Topic:</strong> Student Portal</span>
-              <span><strong>Escalated:</strong> 10:28 AM</span>
-              <span><strong>Last Message:</strong> 10:31 AM</span>
-            </div>
-
-            <div class="admin-item-actions">
-              <button class="admin-primary-btn">Open Chat</button>
-              <button class="admin-secondary-btn">Use Template</button>
-              <button class="admin-secondary-btn">Mark Resolved</button>
-            </div>
-          </article>
+        <div class="admin-item-list" id="ticketList">
         </div>
       </div>
     </section>
@@ -134,6 +91,86 @@
       bindLogout([".cso-logout-link"]);
     });
   </script>
+
+
+<script>
+async function loadTickets() {
+
+    try {
+
+        const response = await fetch("/api/tickets");
+        const tickets = await response.json();
+
+        const container = document.getElementById("ticketList");
+
+        container.innerHTML = "";
+
+        document.querySelectorAll(".admin-summary-card strong")[0].textContent = tickets.length;
+        document.querySelectorAll(".admin-summary-card strong")[1].textContent =
+            tickets.filter(t => t.status === "Open").length;
+
+        tickets.forEach(ticket => {
+
+            container.innerHTML += `
+                <article class="admin-item-card">
+
+                    <div class="admin-item-top">
+                        <div>
+                            <h3>${ticket.ticket_id}</h3>
+                            <p>${ticket.user_message}</p>
+                        </div>
+
+                        <span class="admin-status-badge ${ticket.status === "Open" ? "flagged" : "draft"}">
+                            ${ticket.status}
+                        </span>
+                    </div>
+
+                    <div class="admin-item-meta">
+                        <span><strong>Session:</strong> ${ticket.session_id}</span>
+                        <span><strong>Created:</strong> ${new Date(ticket.created_at).toLocaleString()}</span>
+                    </div>
+
+                    <div class="admin-item-actions">
+
+                        <button
+                            class="admin-primary-btn"
+                            onclick="replyToTicket('${ticket.ticket_id}')">
+                            Respond
+                        </button>
+
+                    </div>
+
+                </article>
+            `;
+        });
+
+    } catch(error) {
+        console.error(error);
+    }
+}
+
+async function replyToTicket(ticketId) {
+
+    const responseText = prompt("Enter your response to the student:");
+
+    if(!responseText) return;
+
+    await fetch(`/api/tickets/${ticketId}/reply`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            response: responseText
+        })
+    });
+
+    alert("Response sent successfully.");
+    loadTickets();
+}
+
+loadTickets();
+</script>
 
 </body>
 
