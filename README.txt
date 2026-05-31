@@ -14,8 +14,10 @@
 
 8. pip install flask flask-cors requests
 
-9. python app.py
+9. pip install google-cloud-dialogflow
 
-10. click on the  *Running on http://127.0.0.1:5000* to run the application
+10. python app.py
+
+11. click on the  *Running on http://127.0.0.1:5000* to run the application
 
 **important, do NOT include the json file inside the GitHub folder, otherwise you cannot push to GitHub and Dialogflow will auto disable the JSON key which will break the linkage**
