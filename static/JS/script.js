@@ -32,7 +32,7 @@ const feedbackReactionButtons = document.querySelectorAll(".feedback-reaction");
 
 
 const initialBotMessage =
-  "Hi, I’m UniHelp. What can I help you with today?\nI need help with...";
+  "Hi, I’m UniHelp. What can I help you with today?\n\nI need help with...";
 
 const initialQuickReplies = [
   "Password Reset",

@@ -920,6 +920,10 @@ img {
   align-self: flex-start;
 }
 
+.welcome-message {
+  white-space: pre-line;
+}
+
 .welcome-quick-replies {
   margin-top: 16px;
   display: flex;
