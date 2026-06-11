@@ -135,13 +135,7 @@ def create_support_ticket(session_id, user_message):
 
 def get_quick_replies(intent_name):
     quick_reply_map = {
-        "Default Welcome Intent": [
-            "Student Card Replacement",
-            "Tuition Fees",
-            "Course Transfer",
-            "Exam Information",
-            "Operating Hours"
-        ],
+
         "student_card_replacement": [
             "Lost/Stolen",
             "Damaged"

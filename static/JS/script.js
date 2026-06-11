@@ -1,4 +1,6 @@
+let hasInitializedChat = false;
 let sessionId = crypto.randomUUID();
+
 
 const chatLauncher = document.getElementById("chatLauncher");
 const chatWindow = document.getElementById("chatWindow");
@@ -27,8 +29,10 @@ const feedbackSuccessMsg = document.getElementById("feedbackSuccessMsg");
 
 const feedbackReactionButtons = document.querySelectorAll(".feedback-reaction");
 
+
+
 const initialBotMessage =
-  "Hi, I’m UniHelp. I can assist with password reset, portal access, Wi-Fi issues, and common campus enquiries.";
+  "Hi, I’m UniHelp. What can I help you with today?\nI need help with...";
 
 const initialQuickReplies = [
   "Password Reset",
@@ -36,6 +40,15 @@ const initialQuickReplies = [
   "Student Portal",
   "Talk to Live Agent",
   "Others"
+];
+
+const otherQuickReplies = [
+  "Student Card Replacement",
+  "Tuition Fees",
+  "Switch Course Major",
+  "Exam Information",
+  "Operating Hours",
+  "Back"
 ];
 
 const feedbackOptions = {
@@ -77,7 +90,13 @@ if (noticeClose && noticeBar) {
 
 function toggleChat() {
   if (!chatWindow) return;
+
+  const willOpen = !chatWindow.classList.contains("open");
   chatWindow.classList.toggle("open");
+
+  if (willOpen && !hasInitializedChat) {
+    initializeChat();
+  }
 }
 
 function closeChatWindow() {
@@ -197,10 +216,38 @@ function addStructuredMessage(data) {
 
   const summary = document.createElement("p");
   summary.className = "bot-summary";
-  summary.textContent =
-    data.summary || data.reply || "Sorry, no reply from server.";
   message.appendChild(summary);
 
+  const timestamp = document.createElement("div");
+  timestamp.className = "message-time bot";
+  timestamp.textContent = getCurrentTime();
+
+  wrapper.append(message, timestamp);
+  chatBody.appendChild(wrapper);
+  chatBody.scrollTop = chatBody.scrollHeight;
+
+  const summaryText =
+    data.summary || data.reply || "Sorry, no reply from server.";
+
+  let index = 0;
+  const speed = summaryText.length > 140 ? 10 : 18;
+  const step = summaryText.length > 140 ? 2 : 1;
+
+  const typingInterval = setInterval(() => {
+    index = Math.min(index + step, summaryText.length);
+    summary.textContent = summaryText.slice(0, index);
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    if (index >= summaryText.length) {
+      clearInterval(typingInterval);
+      appendStructuredDetails(message, data, responseId);
+      addEndIndicator();
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+  }, speed);
+}
+
+function appendStructuredDetails(message, data, responseId) {
   const hasDetails =
     (data.details && data.details.trim()) ||
     (Array.isArray(data.steps) && data.steps.length) ||
@@ -289,10 +336,39 @@ function addStructuredMessage(data) {
       btn.textContent = topic.label || topic.intent;
       relatedWrap.appendChild(btn);
     });
+
     detailBox.appendChild(relatedWrap);
   }
 
   message.appendChild(detailBox);
+}
+
+function addWelcomeMessageWithQuickReplies(text, replies = []) {
+  if (!chatBody) return;
+
+  removeTypingIndicator();
+  removeEndIndicator();
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "message-wrapper bot";
+
+  const message = document.createElement("div");
+  message.className = "message bot welcome-message";
+  message.textContent = text;
+
+  const quickReplyWrap = document.createElement("div");
+  quickReplyWrap.className = "quick-replies welcome-quick-replies";
+
+  replies.forEach((reply) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "quick-reply-btn";
+    btn.dataset.reply = reply;
+    btn.textContent = reply;
+    quickReplyWrap.appendChild(btn);
+  });
+
+  message.appendChild(quickReplyWrap);
 
   const timestamp = document.createElement("div");
   timestamp.className = "message-time bot";
@@ -305,6 +381,40 @@ function addStructuredMessage(data) {
   chatBody.scrollTop = chatBody.scrollHeight;
 }
 
+
+function typeBotMessage(text) {
+  removeTypingIndicator();
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "message-wrapper bot";
+
+  const message = document.createElement("div");
+  message.className = "message bot";
+
+  const timestamp = document.createElement("div");
+  timestamp.className = "message-time bot";
+  timestamp.textContent = getCurrentTime();
+
+  wrapper.append(message, timestamp);
+  chatBody.appendChild(wrapper);
+  chatBody.scrollTop = chatBody.scrollHeight;
+
+  let index = 0;
+  const speed = 18;
+
+  const typingInterval = setInterval(() => {
+    message.textContent = text.slice(0, index + 1);
+    index++;
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    if (index >= text.length) {
+      clearInterval(typingInterval);
+      addEndIndicator();
+    }
+  }, speed);
+}
+
+
 function showTypingIndicator() {
   if (!chatBody) return;
 
@@ -314,8 +424,9 @@ function showTypingIndicator() {
   const typing = document.createElement("div");
   typing.className = "typing-indicator";
   typing.innerHTML = `
-    <span class="typing-bubble">
-      UniHelp is typing<span class="typing-dots">...</span>
+    <span class="typing-label">UniHelp is typing</span>
+    <span class="typing-dots" aria-hidden="true">
+      <span></span><span></span><span></span>
     </span>
   `;
 
@@ -354,16 +465,21 @@ function renderQuickReplies(replies = []) {
 }
 
 function clearQuickReplies() {
-  if (!quickReplies) return;
-  quickReplies.innerHTML = "";
+  const oldQuickReplies = chatBody?.querySelector(".quick-replies-wrapper:last-child");
+  if (oldQuickReplies) oldQuickReplies.remove();
 }
 
 function initializeChat() {
   if (!chatBody) return;
 
   chatBody.innerHTML = "";
-  addMessage(initialBotMessage, "bot");
-  renderQuickReplies(initialQuickReplies);
+  showTypingIndicator();
+
+  setTimeout(() => {
+    removeTypingIndicator();
+    addWelcomeMessageWithQuickReplies(initialBotMessage, initialQuickReplies);
+    hasInitializedChat = true;
+  }, 1000);
 }
 
 /* =========================
@@ -420,24 +536,23 @@ async function sendUserMessage(text, isIntentSelection = false, displayText = nu
     removeTypingIndicator();
 
     if (!response.ok) {
-      addMessage(data.reply || "Something went wrong.", "bot");
-      renderQuickReplies(initialQuickReplies);
+      typeBotMessage(data.reply || "Something went wrong.");
       return;
     }
 
     addStructuredMessage(data);
 
-    const repliesToShow =
-      Array.isArray(data.quickReplies) && data.quickReplies.length > 0
-        ? data.quickReplies
-        : initialQuickReplies;
+    if (Array.isArray(data.quickReplies) && data.quickReplies.length > 0) {
+      renderQuickReplies(data.quickReplies);
+    } else {
+      clearQuickReplies();
+    }
 
-    renderQuickReplies(repliesToShow);
+
   } catch (err) {
     console.error("sendUserMessage error:", err);
     removeTypingIndicator();
-    addMessage("Error talking to server. Please try again later.", "bot");
-    renderQuickReplies(initialQuickReplies);
+    typeBotMessage("Error talking to server. Please try again later.");
   }
 }
 
@@ -610,10 +725,43 @@ chatBody?.addEventListener("click", async (event) => {
     const reply = quickReplyBtn.dataset.reply || "";
     if (!reply.trim()) return;
 
+    const welcomeReplies = chatBody.querySelector(".welcome-quick-replies");
+
+    if (reply === "Others") {
+      if (welcomeReplies) {
+        welcomeReplies.innerHTML = "";
+
+        otherQuickReplies.forEach((item) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "quick-reply-btn";
+          btn.dataset.reply = item;
+          btn.textContent = item;
+          welcomeReplies.appendChild(btn);
+        });
+      }
+      return;
+    }
+
+    if (reply === "Back") {
+      if (welcomeReplies) {
+        welcomeReplies.innerHTML = "";
+
+        initialQuickReplies.forEach((item) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "quick-reply-btn";
+          btn.dataset.reply = item;
+          btn.textContent = item;
+          welcomeReplies.appendChild(btn);
+        });
+      }
+      return;
+    }
+
     clearQuickReplies();
     storeSentMessage(reply);
     await sendUserMessage(reply, false, reply);
-
   }
 });
 
@@ -685,4 +833,3 @@ fontSizeToggle?.addEventListener("click", () => {
 
 applyTheme(localStorage.getItem("theme") || "light");
 applyFontSizePreference();
-initializeChat();
