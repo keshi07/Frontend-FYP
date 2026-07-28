@@ -326,7 +326,8 @@ def chat():
             "quickReplies": [],
             "intent": "LiveAgentEscalation",
             "displayName": "Live Agent Escalation",
-            "sessionId": session_id
+            "sessionId": session_id,
+            "ticketId": ticket_id
         })
 
 
@@ -696,6 +697,71 @@ def get_tickets():
 
     return jsonify(response.json())
 
+@app.route("/api/chat/<ticket_id>", methods=["GET"])
+def get_chat_messages(ticket_id):
+    url = f"{supabase_url}/rest/v1/chat_messages"
+
+    response = requests.get(
+        url,
+        headers=supabase_headers(),
+        params={
+            "ticket_id": f"eq.{ticket_id}",
+            "select": "*",
+            "order": "created_at.asc"
+        }
+    )
+
+    response.raise_for_status()
+
+    messages = response.json()
+
+    for message in messages:
+        created_at = message.get("created_at")
+
+        if created_at and not created_at.endswith("Z"):
+            if "+" not in created_at[-6:] and "-" not in created_at[-6:]:
+                message["created_at"] = created_at + "+00:00"
+
+    return jsonify(messages)
+
+
+@app.route("/api/chat/send", methods=["POST"])
+def send_chat_message():
+    data = request.get_json()
+
+    ticket_id = data.get("ticketId")
+    sender = data.get("sender")
+    message = data.get("message")
+
+    if not ticket_id or not sender or not message:
+        return jsonify({
+            "error": "ticketId, sender and message are required"
+        }), 400
+
+    url = f"{supabase_url}/rest/v1/chat_messages"
+
+    response = requests.post(
+        url,
+        headers={
+            **supabase_headers(),
+            "Content-Type": "application/json",
+            "Prefer": "return=representation"
+        },
+        json={
+            "ticket_id": ticket_id,
+            "sender": sender,
+            "message": message
+        }
+    )
+
+    if not response.ok:
+        print("Supabase error:", response.status_code, response.text)
+
+        return jsonify({
+            "error": response.text
+        }), response.status_code
+
+    return jsonify(response.json()), 201
 
 @app.route("/api/tickets/<ticket_id>/reply", methods=["PUT"])
 def reply_ticket(ticket_id):

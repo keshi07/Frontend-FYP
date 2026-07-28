@@ -1,177 +1,539 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSO Dashboard | Excellence University</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CSO Dashboard | Excellence University</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
+    <style>
+      /* Ticket spacing */
+      #ticketList {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        padding: 10px;
+      }
 
-<body>
-  <main class="admin-layout">
-    <aside class="admin-sidebar">
-      <div class="admin-sidebar-top">
-        <div class="admin-logo-block">
-          <img src="{{ url_for('static', filename='images/school-logo.png') }}" alt="Excellence University Logo"
-            class="admin-logo" />
+      /* Chat layout */
+      #chatWindow {
+        display: flex;
+        flex-direction: column;
+      }
+
+      #chatWindow .student,
+      #chatWindow .cso {
+        max-width: 70%;
+        margin-bottom: 15px;
+        padding: 10px 14px;
+        overflow-wrap: anywhere;
+      }
+
+      #chatWindow .student {
+        align-self: flex-start;
+        text-align: left;
+        background: #f1f1f1;
+        color: #222;
+        border-radius: 14px 14px 14px 4px;
+      }
+
+      #chatWindow .cso {
+        align-self: flex-end;
+        text-align: right;
+        background: #6366f1;
+        color: #fff;
+        border-radius: 14px 14px 4px 14px;
+      }
+
+      .chat-message-time {
+        margin-top: 5px;
+        font-size: 11px;
+        color: #777;
+      }
+
+      #chatWindow .student .chat-message-time {
+        text-align: left;
+      }
+
+      #chatWindow .cso .chat-message-time {
+        text-align: right;
+        color: rgba(255, 255, 255, 0.82);
+      }
+
+      /* Resolved badge uses the same purple as the action button */
+      .admin-status-badge.resolved,
+      #resolveBtn {
+        background: #6366f1;
+        color: #fff;
+      }
+
+      #resolveBtn:disabled,
+      #sendBtn:disabled,
+      #chatInput:disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="admin-layout">
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar-top">
+          <div class="admin-logo-block">
+            <img
+              src="{{ url_for('static', filename='images/school-logo.png') }}"
+              alt="Excellence University Logo"
+              class="admin-logo"
+            />
+          </div>
+
+          <div class="admin-user-card">
+            <div class="cso-user-info cso-user-info-only">
+              <strong id="displayName">Loading...</strong>
+              <p id="displayRole">Loading...</p>
+            </div>
+          </div>
+
+          <nav class="admin-sidebar-nav">
+            <a href="#" class="active">All Requests</a>
+            <a href="#">Escalated Cases</a>
+            <a href="#">Resolved Cases</a>
+            <a href="#">History</a>
+
+            <a href="{{ url_for('login') }}" class="cso-logout-link">
+              <span class="logout-icon">⇦</span>
+              <span>Log Out</span>
+            </a>
+          </nav>
+        </div>
+      </aside>
+
+      <section class="admin-main">
+        <div class="admin-header">
+          <h1>View All Escalated Requests</h1>
         </div>
 
-        <div class="admin-user-card">
-          <div class="cso-user-info cso-user-info-only">
-            <strong id="displayName">Loading...</strong>
-            <p id="displayRole">Loading...</p>
+        <div class="admin-summary-cards">
+          <div class="admin-summary-card">
+            <h3>Total Escalated</h3>
+            <strong>0</strong>
+            <span>Cases assigned</span>
+          </div>
+
+          <div class="admin-summary-card">
+            <h3>Open Cases</h3>
+            <strong>0</strong>
+            <span>Available to respond</span>
+          </div>
+
+          <div class="admin-summary-card">
+            <h3>High Priority</h3>
+            <strong>0</strong>
+            <span>Needs urgent action</span>
           </div>
         </div>
 
-        <nav class="admin-sidebar-nav">
-          <a href="#" class="active">All Requests</a>
-          <a href="#">Escalated Cases</a>
-          <a href="#">Resolved Cases</a>
-          <a href="#">History</a>
-
-          <a href="{{ url_for('login') }}" class="cso-logout-link">
-            <span class="logout-icon">⇦</span>
-            <span>Log Out</span>
-          </a>
-        </nav>
-      </div>
-    </aside>
-
-    <section class="admin-main">
-      <div class="admin-header">
-        <h1>View All Escalated Requests</h1>
-      </div>
-
-      <div class="admin-summary-cards">
-        <div class="admin-summary-card">
-          <h3>Total Escalated</h3>
-          <strong>8</strong>
-          <span>Cases assigned</span>
+        <div class="admin-search-bar">
+          <input type="text" placeholder="Search by case title or topic" />
         </div>
 
-        <div class="admin-summary-card">
-          <h3>Open Cases</h3>
-          <strong>5</strong>
-          <span>Available to respond</span>
+        <div
+          class="admin-panel"
+          style="display: flex; gap: 20px; height: 650px"
+        >
+          <!-- LEFT SIDE -->
+          <div
+            style="
+              width: 35%;
+              border-right: 1px solid #ddd;
+              overflow-y: auto;
+              padding-right: 15px;
+            "
+          >
+            <div class="admin-panel-header">
+              <h2>Assigned Cases</h2>
+            </div>
+
+            <div id="ticketList"></div>
+          </div>
+
+          <!-- RIGHT SIDE -->
+          <div style="flex: 1; display: flex; flex-direction: column">
+            <div
+              class="admin-panel-header"
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 15px;
+              "
+            >
+              <h2 id="chatTitle">Select a ticket</h2>
+
+              <button
+                id="resolveBtn"
+                type="button"
+                class="admin-primary-btn"
+                onclick="markAsResolved()"
+                style="display: none"
+              >
+                Mark as Resolved
+              </button>
+            </div>
+
+            <div
+              id="chatWindow"
+              style="
+                flex: 1;
+                overflow-y: auto;
+                padding: 20px;
+                background: #fafafa;
+                border: 1px solid #ddd;
+              "
+            ></div>
+
+            <div style="display: flex; gap: 10px; margin-top: 15px">
+              <input
+                id="chatInput"
+                type="text"
+                placeholder="Type a reply..."
+                autocomplete="off"
+                style="flex: 1"
+                onkeydown="
+                  if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    document.getElementById('sendBtn').click();
+                  }
+                "
+              />
+
+              <button
+                id="sendBtn"
+                type="button"
+                class="admin-primary-btn"
+                onclick="sendReply()"
+              >
+                Send
+              </button>
+            </div>
+          </div>
         </div>
+      </section>
+    </main>
 
-        <div class="admin-summary-card">
-          <h3>High Priority</h3>
-          <strong>1</strong>
-          <span>Needs urgent action</span>
-        </div>
-      </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="{{ url_for('static', filename='js/supabase-config.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/auth-guard.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/logout.js') }}"></script>
 
-      <div class="admin-search-bar">
-        <input type="text" placeholder="Search by case title or topic" />
-      </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        await guardDashboard("cso", "Customer Service Officer");
+        bindLogout([".cso-logout-link"]);
+      });
+    </script>
 
-      <div class="admin-panel">
-        <div class="admin-panel-header">
-          <h2>Assigned Cases</h2>
-        </div>
+    <script>
+      let selectedTicket = null;
+      let selectedTicketStatus = null;
+      let chatInterval = null;
+      let conversationRequestNumber = 0;
 
-        <div class="admin-item-list" id="ticketList">
-        </div>
-      </div>
-    </section>
-  </main>
+      function formatSingaporeTime(timestamp) {
+        if (!timestamp) return "";
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="{{ url_for('static', filename='js/supabase-config.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+        let utcTimestamp = String(timestamp).trim();
 
-  <script src="{{ url_for('static', filename='js/auth-guard.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/logout.js') }}"></script>
+        // The API currently returns UTC without Z or +00:00.
+        // Add Z so the browser interprets it as UTC before converting to SGT.
+        const hasTimezone =
+          utcTimestamp.endsWith("Z") || /[+-]\d{2}:?\d{2}$/.test(utcTimestamp);
 
-  <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      await guardDashboard("cso", "Customer Service Officer");
-      bindLogout([".cso-logout-link"]);
-    });
-  </script>
+        if (!hasTimezone) {
+          utcTimestamp += "Z";
+        }
 
+        const date = new Date(utcTimestamp);
 
-<script>
-async function loadTickets() {
+        if (Number.isNaN(date.getTime())) {
+          console.error("Invalid message timestamp:", timestamp);
+          return "";
+        }
 
-    try {
+        return new Intl.DateTimeFormat("en-SG", {
+          timeZone: "Asia/Singapore",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        }).format(date);
+      }
 
-        const response = await fetch("/api/tickets");
-        const tickets = await response.json();
+      function setReplyControls(status) {
+        const isResolved = status === "Resolved";
+        const input = document.getElementById("chatInput");
+        const sendButton = document.getElementById("sendBtn");
+        const resolveButton = document.getElementById("resolveBtn");
 
-        const container = document.getElementById("ticketList");
+        input.disabled = isResolved;
+        sendButton.disabled = isResolved;
+        input.placeholder = isResolved
+          ? "This ticket has been resolved"
+          : "Type a reply...";
 
-        container.innerHTML = "";
+        resolveButton.style.display = "block";
+        resolveButton.disabled = isResolved;
+        resolveButton.textContent = isResolved
+          ? "Resolved"
+          : "Mark as Resolved";
+      }
 
-        document.querySelectorAll(".admin-summary-card strong")[0].textContent = tickets.length;
-        document.querySelectorAll(".admin-summary-card strong")[1].textContent =
-            tickets.filter(t => t.status === "Open").length;
+      async function loadTickets() {
+        try {
+          const response = await fetch("/api/tickets");
 
-        tickets.forEach(ticket => {
+          if (!response.ok) {
+            throw new Error(`Failed to load tickets: ${response.status}`);
+          }
 
-            container.innerHTML += `
-                <article class="admin-item-card">
+          const tickets = await response.json();
+          const container = document.getElementById("ticketList");
+          const counters = document.querySelectorAll(
+            ".admin-summary-card strong",
+          );
 
-                    <div class="admin-item-top">
-                        <div>
-                            <h3>${ticket.ticket_id}</h3>
-                            <p>${ticket.user_message}</p>
-                        </div>
+          container.innerHTML = "";
 
-                        <span class="admin-status-badge ${ticket.status === "Open" ? "flagged" : "draft"}">
-                            ${ticket.status}
-                        </span>
-                    </div>
+          counters[0].textContent = tickets.length;
+          counters[1].textContent = tickets.filter(
+            (ticket) => ticket.status === "Open",
+          ).length;
 
-                    <div class="admin-item-meta">
-                        <span><strong>Session:</strong> ${ticket.session_id}</span>
-                        <span><strong>Created:</strong> ${new Date(ticket.created_at).toLocaleString()}</span>
-                    </div>
+          tickets.forEach((ticket) => {
+            const article = document.createElement("article");
+            article.className = "admin-item-card";
+            article.style.cursor = "pointer";
 
-                    <div class="admin-item-actions">
+            article.addEventListener("click", () => {
+              openChat(ticket.ticket_id, ticket.status);
+            });
 
-                        <button
-                            class="admin-primary-btn"
-                            onclick="replyToTicket('${ticket.ticket_id}')">
-                            Respond
-                        </button>
+            const top = document.createElement("div");
+            top.className = "admin-item-top";
 
-                    </div>
+            const details = document.createElement("div");
+            const title = document.createElement("h3");
+            const preview = document.createElement("p");
 
-                </article>
-            `;
-        });
+            title.textContent = ticket.ticket_id;
+            preview.textContent = ticket.user_message || "No message preview";
 
-    } catch(error) {
-        console.error(error);
-    }
-}
+            details.append(title, preview);
 
-async function replyToTicket(ticketId) {
+            const badge = document.createElement("span");
+            const isResolved = ticket.status === "Resolved";
+            badge.className = `admin-status-badge ${
+              isResolved ? "resolved" : "flagged"
+            }`;
+            badge.textContent = ticket.status;
 
-    const responseText = prompt("Enter your response to the student:");
+            top.append(details, badge);
+            article.appendChild(top);
+            container.appendChild(article);
+          });
+        } catch (error) {
+          console.error("Unable to load tickets:", error);
+        }
+      }
 
-    if(!responseText) return;
+      let conversationLoading = false;
 
-    await fetch(`/api/tickets/${ticketId}/reply`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            response: responseText
-        })
-    });
+      async function openChat(ticketId) {
+        selectedTicket = ticketId;
 
-    alert("Response sent successfully.");
-    loadTickets();
-}
+        document.getElementById("chatTitle").textContent = ticketId;
 
-loadTickets();
-</script>
+        // Stop polling the previously selected ticket
+        if (chatInterval) {
+          clearInterval(chatInterval);
+          chatInterval = null;
+        }
 
-</body>
+        // Load immediately
+        await loadConversation();
 
+        // Then refresh every second
+        chatInterval = setInterval(() => {
+          loadConversation();
+        }, 1000);
+      }
+
+      async function loadConversation() {
+        if (!selectedTicket || conversationLoading) return;
+
+        conversationLoading = true;
+
+        const ticketBeingLoaded = selectedTicket;
+
+        try {
+          const response = await fetch(
+            `/api/chat/${encodeURIComponent(ticketBeingLoaded)}?t=${Date.now()}`,
+            {
+              method: "GET",
+              cache: "no-store",
+            },
+          );
+
+          if (!response.ok) {
+            throw new Error(`Failed to load chat: ${response.status}`);
+          }
+
+          const messages = await response.json();
+
+          // Do not display results from a previously selected ticket
+          if (ticketBeingLoaded !== selectedTicket) {
+            return;
+          }
+
+          const chat = document.getElementById("chatWindow");
+
+          const previousScrollTop = chat.scrollTop;
+          const previousScrollHeight = chat.scrollHeight;
+
+          const isNearBottom =
+            previousScrollHeight - previousScrollTop - chat.clientHeight < 80;
+
+          chat.innerHTML = "";
+
+          messages.forEach((msg) => {
+            const bubble = document.createElement("div");
+
+            bubble.className = msg.sender;
+
+            const messageTime = formatSingaporeTime(msg.created_at);
+
+            bubble.innerHTML = `
+        <strong>${msg.sender.toUpperCase()}</strong><br>
+        <span>${msg.message}</span>
+        <div class="chat-message-time">${messageTime}</div>
+      `;
+
+            chat.appendChild(bubble);
+          });
+
+          if (isNearBottom) {
+            chat.scrollTop = chat.scrollHeight;
+          } else {
+            const heightDifference = chat.scrollHeight - previousScrollHeight;
+
+            chat.scrollTop = previousScrollTop + heightDifference;
+          }
+        } catch (error) {
+          console.error("Unable to refresh conversation:", error);
+        } finally {
+          conversationLoading = false;
+        }
+      }
+
+      async function sendReply() {
+        if (!selectedTicket || selectedTicketStatus === "Resolved") return;
+
+        const input = document.getElementById("chatInput");
+        const sendButton = document.getElementById("sendBtn");
+        const text = input.value.trim();
+
+        if (!text) return;
+
+        input.value = "";
+        input.disabled = true;
+        sendButton.disabled = true;
+
+        try {
+          const response = await fetch("/api/chat/send", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              ticketId: selectedTicket,
+              sender: "cso",
+              message: text,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Send failed: ${response.status}`);
+          }
+
+          await loadConversation(true);
+        } catch (error) {
+          console.error("Unable to send reply:", error);
+          input.value = text;
+          alert("Unable to send the reply. Please try again.");
+        } finally {
+          if (selectedTicketStatus !== "Resolved") {
+            input.disabled = false;
+            sendButton.disabled = false;
+            input.focus();
+          }
+        }
+      }
+
+      async function markAsResolved() {
+        if (!selectedTicket || selectedTicketStatus === "Resolved") return;
+
+        const confirmed = confirm(`Mark ticket ${selectedTicket} as resolved?`);
+
+        if (!confirmed) return;
+
+        const resolveButton = document.getElementById("resolveBtn");
+        resolveButton.disabled = true;
+        resolveButton.textContent = "Resolving...";
+
+        try {
+          const response = await fetch(
+            `/api/tickets/${encodeURIComponent(selectedTicket)}/resolve`,
+            {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            },
+          );
+
+          let result = {};
+          const responseText = await response.text();
+
+          if (responseText) {
+            try {
+              result = JSON.parse(responseText);
+            } catch {
+              result = { message: responseText };
+            }
+          }
+
+          if (!response.ok) {
+            throw new Error(result.error || "Unable to resolve ticket");
+          }
+
+          selectedTicketStatus = "Resolved";
+          setReplyControls("Resolved");
+
+          // Reload cards so the Open badge immediately becomes purple Resolved.
+          await loadTickets();
+        } catch (error) {
+          console.error("Resolve ticket error:", error);
+          alert(error.message);
+          resolveButton.disabled = false;
+          resolveButton.textContent = "Mark as Resolved";
+        }
+      }
+
+      loadTickets();
+    </script>
+  </body>
 </html>
