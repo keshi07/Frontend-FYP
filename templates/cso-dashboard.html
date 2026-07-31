@@ -25,11 +25,17 @@
       }
 
       #chatWindow .student,
-      #chatWindow .cso {
+      #chatWindow .cso,
+      #chatWindow .system {
         max-width: 70%;
-        margin-bottom: 15px;
         padding: 10px 14px;
         overflow-wrap: anywhere;
+        white-space: pre-line;
+      }
+
+      #chatWindow .student,
+      #chatWindow .cso {
+        margin-bottom: 15px;
       }
 
       #chatWindow .student {
@@ -42,7 +48,30 @@
 
       #chatWindow .cso {
         align-self: flex-end;
-        text-align: right;
+        text-align: left;
+        background: #6366f1;
+        color: #fff;
+        border-radius: 14px 14px 4px 14px;
+      }
+
+      #chatWindow .system {
+        align-self: flex-start;
+        text-align: left;
+        background: #eef2ff;
+        color: #3730a3;
+        border: 1px solid #c7d2fe;
+        border-radius: 10px;
+        margin-bottom: 24px;
+      }
+
+      #chatWindow .system .chat-message-time {
+        text-align: left;
+        color: #6b7280;
+      }
+
+      #chatWindow .cso {
+        align-self: flex-end;
+        text-align: left;
         background: #6366f1;
         color: #fff;
         border-radius: 14px 14px 4px 14px;
@@ -70,11 +99,275 @@
         color: #fff;
       }
 
-      #resolveBtn:disabled,
       #sendBtn:disabled,
       #chatInput:disabled {
         cursor: not-allowed;
         opacity: 0.65;
+      }
+
+      #closeTicketBtn {
+        background: #dc2626;
+        color: #fff;
+      }
+
+      #closeTicketBtn:hover:not(:disabled) {
+        background: #b91c1c;
+      }
+
+      #resolutionMessageBtn:disabled,
+      #closeTicketBtn:disabled {
+        cursor: not-allowed;
+        opacity: 0.65;
+      }
+
+      .chat-case-heading {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 24px;
+        min-width: 0;
+      }
+
+      .chat-case-details {
+        flex-shrink: 0;
+      }
+
+      .chat-case-heading h2 {
+        margin: 0;
+      }
+
+      .chat-case-heading .ticket-timing {
+        margin-top: 0;
+        white-space: nowrap;
+      }
+
+      .chat-case-heading h2 {
+        margin: 0;
+      }
+
+      .chat-topic {
+        margin: 5px 0 0;
+        color: #4f5665;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .ticket-timing {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 6px;
+        color: #6b7280;
+        font-size: 14px;
+      }
+
+      .ticket-timing-separator {
+        color: #a0a5b1;
+      }
+
+      .admin-status-badge.in-progress {
+        background: #f59e0b;
+        color: #ffffff;
+      }
+
+      .total-assigned-card {
+        background: #ede9fe;
+        border-left: 5px solid #7c3aed;
+      }
+
+      .active-cases-card {
+        background: #fff7ed;
+        border-left: 5px solid #f59e0b;
+      }
+
+      .resolved-today-card {
+        background: #ecfdf5;
+        border-left: 5px solid #10b981;
+      }
+
+      .total-assigned-card strong {
+        color: #6d28d9;
+      }
+
+      .active-cases-card strong {
+        color: #d97706;
+      }
+
+      .resolved-today-card strong {
+        color: #059669;
+      }
+
+      .admin-item-card {
+        border: 1px solid transparent;
+        transition:
+          background-color 0.18s ease,
+          border-color 0.18s ease,
+          box-shadow 0.18s ease;
+      }
+
+      .admin-item-card:hover {
+        background: #f5f3ff;
+        border-color: #c4b5fd;
+      }
+
+      .admin-item-card.selected-ticket {
+        background: #ede9fe;
+        border-color: #7c3aed;
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.12);
+      }
+
+      .ticket-search-empty {
+        margin: 12px 10px;
+        padding: 18px 12px;
+        color: #6b7280;
+        text-align: center;
+        border: 1px dashed #cfd5df;
+        border-radius: 10px;
+        background: #fafafa;
+      }
+
+      /* Use the full space available to the right of the fixed sidebar. */
+      .admin-main {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .admin-search-bar input {
+        max-width: none;
+      }
+
+      .admin-panel {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+      }
+
+      .ticket-list-column {
+        flex: 0 0 300px;
+        min-width: 260px;
+        border-right: 1px solid #ddd;
+        overflow-y: auto;
+        padding-right: 15px;
+      }
+
+      .chat-column {
+        flex: 1 1 auto;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-action-row {
+        display: grid !important;
+        grid-template-columns:
+          minmax(260px, 2fr)
+          repeat(3, minmax(110px, 0.7fr));
+        align-items: stretch !important;
+        gap: 10px !important;
+      }
+
+      .chat-action-row #chatInput {
+          width: 100%;
+          height: 60px;
+          resize: none;
+          padding: 12px 16px;
+          border: 1px solid #cfd5df;
+          border-radius: 12px;
+          box-sizing: border-box;
+          font: inherit;
+          line-height: 1.4;
+      }
+
+      .chat-action-row #chatInput:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.14);
+      }
+
+      .chat-action-row button {
+        width: 100%;
+        min-width: 0;
+        min-height: 46px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        white-space: normal;
+        line-height: 1.15;
+        text-align: center;
+      }
+
+      @media (max-width: 1100px) {
+        .chat-action-row {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .chat-action-row #chatInput {
+          grid-column: 1 / -1;
+        }
+      }
+
+      .quick-response-section {
+        margin-top: 14px;
+        padding: 14px;
+        background: #ffffff;
+        border: 1px solid #dfe3eb;
+        border-radius: 12px;
+      }
+
+      .quick-response-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+      @media (max-width: 800px) {
+        .quick-response-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+
+      .quick-response-header span {
+        color: #1f2937;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .quick-response-header small {
+        color: #6b7280;
+        font-size: 12px;
+      }
+
+      .quick-response-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .quick-response-btn {
+        padding: 8px 12px;
+        border: 1px solid #c7d2fe;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          background-color 0.18s ease,
+          border-color 0.18s ease,
+          transform 0.18s ease;
+      }
+
+      .quick-response-btn:hover:not(:disabled) {
+        background: #e0e7ff;
+        border-color: #818cf8;
+        transform: translateY(-1px);
+      }
+
+      .quick-response-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
       }
     </style>
   </head>
@@ -99,10 +392,17 @@
           </div>
 
           <nav class="admin-sidebar-nav">
-            <a href="#" class="active">All Requests</a>
-            <a href="#">Escalated Cases</a>
-            <a href="#">Resolved Cases</a>
-            <a href="#">History</a>
+            <a href="#" class="active" data-filter="all">
+              📋 All Requests
+            </a>
+
+            <a href="#" data-filter="active">
+              🟠 Active Cases
+            </a>
+
+            <a href="#" data-filter="resolved">
+              ✅ Resolved Cases
+            </a>
 
             <a href="{{ url_for('login') }}" class="cso-logout-link">
               <span class="logout-icon">⇦</span>
@@ -116,44 +416,43 @@
         <div class="admin-header">
           <h1>View All Escalated Requests</h1>
         </div>
-
+        
         <div class="admin-summary-cards">
-          <div class="admin-summary-card">
-            <h3>Total Escalated</h3>
+          <div class="admin-summary-card total-assigned-card">
+            <h3>Total Assigned Cases</h3>
             <strong>0</strong>
-            <span>Cases assigned</span>
+            <span>All assigned tickets</span>
           </div>
 
-          <div class="admin-summary-card">
-            <h3>Open Cases</h3>
+          <div class="admin-summary-card active-cases-card">
+            <h3>Active Cases</h3>
             <strong>0</strong>
-            <span>Available to respond</span>
+            <span>Open or in progress</span>
           </div>
 
-          <div class="admin-summary-card">
-            <h3>High Priority</h3>
+          <div class="admin-summary-card resolved-today-card">
+            <h3>Resolved Today</h3>
             <strong>0</strong>
-            <span>Needs urgent action</span>
+            <span>Closed today</span>
           </div>
         </div>
 
         <div class="admin-search-bar">
-          <input type="text" placeholder="Search by case title or topic" />
+          <input
+            id="ticketSearchInput"
+            type="search"
+            placeholder="Search by case title, topic, status or message"
+            aria-label="Search assigned support cases"
+            autocomplete="off"
+          />
         </div>
 
         <div
           class="admin-panel"
-          style="display: flex; gap: 20px; height: 650px"
+          style="display: flex; gap: 20px; height: 760px"
         >
           <!-- LEFT SIDE -->
-          <div
-            style="
-              width: 35%;
-              border-right: 1px solid #ddd;
-              overflow-y: auto;
-              padding-right: 15px;
-            "
-          >
+          <div class="ticket-list-column">
             <div class="admin-panel-header">
               <h2>Assigned Cases</h2>
             </div>
@@ -162,7 +461,7 @@
           </div>
 
           <!-- RIGHT SIDE -->
-          <div style="flex: 1; display: flex; flex-direction: column">
+          <div class="chat-column">
             <div
               class="admin-panel-header"
               style="
@@ -172,16 +471,26 @@
                 gap: 15px;
               "
             >
+          <div class="chat-case-heading">
+            <div class="chat-case-details">
               <h2 id="chatTitle">Select a ticket</h2>
+              <p id="chatTopic" class="chat-topic"></p>
+            </div>
 
+            <div id="ticketTiming" class="ticket-timing" style="display: none">
+              <span id="escalatedTime"></span>
+              <span class="ticket-timing-separator">•</span>
+              <span id="waitingDuration"></span>
+            </div>
+          </div>
               <button
-                id="resolveBtn"
+                id="closeTicketBtn"
                 type="button"
                 class="admin-primary-btn"
-                onclick="markAsResolved()"
+                onclick="closeTicket()"
                 style="display: none"
               >
-                Mark as Resolved
+                Close Ticket
               </button>
             </div>
 
@@ -195,21 +504,78 @@
                 border: 1px solid #ddd;
               "
             ></div>
+            <div class="quick-response-section">
+              <div class="quick-response-header">
+                <span>Quick Responses</span>
+                <small>Click a template to insert it into the reply box</small>
+              </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 15px">
-              <input
+              <div class="quick-response-buttons">
+                <button
+                  type="button"
+                  class="quick-response-btn"
+                  onclick="insertQuickResponse('passwordReset')"
+                >
+                  Password Reset
+                </button>
+
+                <button
+                  type="button"
+                  class="quick-response-btn"
+                  onclick="insertQuickResponse('courseRegistration')"
+                >
+                  Course Registration
+                </button>
+
+                <button
+                  type="button"
+                  class="quick-response-btn"
+                  onclick="insertQuickResponse('tuitionFees')"
+                >
+                  Tuition Fees
+                </button>
+
+                <button
+                  type="button"
+                  class="quick-response-btn"
+                  onclick="insertQuickResponse('examResults')"
+                >
+                  Exam Results
+                </button>
+
+                <button
+                  type="button"
+                  class="quick-response-btn"
+                  onclick="insertQuickResponse('itSupport')"
+                >
+                  IT Support
+                </button>
+
+                <button
+                  type="button"
+                  class="quick-response-btn"
+                  onclick="insertQuickResponse('admissions')"
+                >
+                  Admissions
+                </button>
+              </div>
+            </div>
+            <div
+              class="chat-action-row"
+              style="margin-top: 15px"
+            >
+              <textarea
                 id="chatInput"
-                type="text"
                 placeholder="Type a reply..."
                 autocomplete="off"
-                style="flex: 1"
+                rows="4"
                 onkeydown="
                   if (event.key === 'Enter' && !event.shiftKey) {
                     event.preventDefault();
                     document.getElementById('sendBtn').click();
                   }
                 "
-              />
+              ></textarea>
 
               <button
                 id="sendBtn"
@@ -219,6 +585,27 @@
               >
                 Send
               </button>
+
+              <button
+                id="introductionBtn"
+                type="button"
+                class="admin-primary-btn"
+                onclick="sendIntroductionMessage()"
+                style="display: none"
+              >
+                Introduction
+              </button>
+
+              <button
+                id="resolutionMessageBtn"
+                type="button"
+                class="admin-primary-btn"
+                onclick="sendStandardResolutionMessage()"
+                style="display: none"
+              >
+                Send Resolution Message
+              </button>
+
             </div>
           </div>
         </div>
@@ -241,8 +628,15 @@
     <script>
       let selectedTicket = null;
       let selectedTicketStatus = null;
+      let selectedTicketData = null;
+      let waitingTimer = null;
       let chatInterval = null;
       let conversationRequestNumber = 0;
+      let allTickets = [];
+      let ticketsLoading = false;
+      let ticketSearchQuery = "";
+      let currentSidebarFilter = 'all';
+      const introductionSentTickets = new Set();
 
       function formatSingaporeTime(timestamp) {
         if (!timestamp) return "";
@@ -273,103 +667,466 @@
         }).format(date);
       }
 
+      function parseApiTimestamp(timestamp) {
+        if (!timestamp) return null;
+
+        let value = String(timestamp).trim();
+
+        const hasTimezone =
+          value.endsWith("Z") || /[+-]\d{2}:?\d{2}$/.test(value);
+
+        if (!hasTimezone) {
+          value += "Z";
+        }
+
+        const date = new Date(value);
+
+        return Number.isNaN(date.getTime()) ? null : date;
+      }
+
+      function formatEscalationTime(timestamp) {
+        const date = parseApiTimestamp(timestamp);
+
+        if (!date) {
+          return "Escalation time unavailable";
+        }
+
+        return new Intl.DateTimeFormat("en-SG", {
+          timeZone: "Asia/Singapore",
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        }).format(date);
+      }
+
+      function formatElapsedDuration(startTimestamp, endTimestamp = null) {
+        const start = parseApiTimestamp(startTimestamp);
+        const end = endTimestamp
+          ? parseApiTimestamp(endTimestamp)
+          : new Date();
+
+        if (!start || !end) {
+          return "Waiting time unavailable";
+        }
+
+        const elapsedMilliseconds = Math.max(
+          0,
+          end.getTime() - start.getTime()
+        );
+
+        const totalMinutes = Math.floor(elapsedMilliseconds / 60000);
+
+        if (totalMinutes < 1) {
+          return "Waiting less than 1 minute";
+        }
+
+        if (totalMinutes === 1) {
+          return "Waiting 1 minute";
+        }
+
+        if (totalMinutes < 60) {
+          return `Waiting ${totalMinutes} minutes`;
+        }
+
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        const hourText =
+          hours === 1 ? "1 hour" : `${hours} hours`;
+
+        if (minutes === 0) {
+          return `Waiting ${hourText}`;
+        }
+
+        const minuteText =
+          minutes === 1 ? "1 minute" : `${minutes} minutes`;
+
+        return `Waiting ${hourText} ${minuteText}`;
+      }
+
+      function startWaitingTimer(ticket) {
+        if (waitingTimer) {
+          clearInterval(waitingTimer);
+          waitingTimer = null;
+        }
+
+        const timingContainer =
+          document.getElementById("ticketTiming");
+        const escalatedTime =
+          document.getElementById("escalatedTime");
+        const waitingDuration =
+          document.getElementById("waitingDuration");
+
+        if (!ticket || !ticket.created_at) {
+          timingContainer.style.display = "none";
+          escalatedTime.textContent = "";
+          waitingDuration.textContent = "";
+          return;
+        }
+
+        timingContainer.style.display = "flex";
+        escalatedTime.textContent =
+          `Escalated at ${formatEscalationTime(ticket.created_at)}`;
+
+        function updateWaitingDuration() {
+          const isResolved = ticket.status === "Resolved";
+          const endTimestamp =
+            isResolved && ticket.resolved_at
+              ? ticket.resolved_at
+              : null;
+
+          waitingDuration.textContent =
+            formatElapsedDuration(
+              ticket.created_at,
+              endTimestamp
+            );
+        }
+
+        updateWaitingDuration();
+
+        if (ticket.status !== "Resolved") {
+          waitingTimer = setInterval(
+            updateWaitingDuration,
+            60000
+          );
+        }
+      }
+
       function setReplyControls(status) {
         const isResolved = status === "Resolved";
         const input = document.getElementById("chatInput");
         const sendButton = document.getElementById("sendBtn");
-        const resolveButton = document.getElementById("resolveBtn");
+        const introductionButton =
+          document.getElementById("introductionBtn");
+        const resolutionButton =
+          document.getElementById("resolutionMessageBtn");
+        const closeButton =
+          document.getElementById("closeTicketBtn");
 
         input.disabled = isResolved;
         sendButton.disabled = isResolved;
+        setQuickResponseButtonsDisabled(isResolved);
         input.placeholder = isResolved
           ? "This ticket has been resolved"
           : "Type a reply...";
 
-        resolveButton.style.display = "block";
-        resolveButton.disabled = isResolved;
-        resolveButton.textContent = isResolved
-          ? "Resolved"
-          : "Mark as Resolved";
+        introductionButton.style.display = "block";
+        resolutionButton.style.display = "block";
+        closeButton.style.display = "block";
+
+        introductionButton.disabled = isResolved;
+        resolutionButton.disabled = isResolved;
+        closeButton.disabled = isResolved;
+
+        introductionButton.textContent = isResolved
+          ? "Introduction Sent"
+          : "Introduction Message";
+
+        resolutionButton.textContent = isResolved
+          ? "Resolution Sent"
+          : "Final Resolution Message";
+
+        closeButton.textContent = isResolved
+          ? "Closed"
+          : "Close Ticket";
+      }
+
+      function normalizeSearchText(value) {
+        return String(value || "").trim().toLowerCase();
+      }
+
+      function ticketMatchesSearch(ticket, query) {
+        const normalizedQuery = normalizeSearchText(query);
+
+        if (!normalizedQuery) {
+          return true;
+        }
+
+        const searchableText = [
+          ticket.ticket_id,
+          ticket.case_topic,
+          ticket.user_message,
+          ticket.status,
+        ]
+          .map(normalizeSearchText)
+          .join(" ");
+
+        return searchableText.includes(normalizedQuery);
+      }
+
+      function renderTicketList(tickets) {
+        const container = document.getElementById("ticketList");
+        container.innerHTML = "";
+
+        const matchingTickets = tickets.filter((ticket) => {
+          const matchesSearch = ticketMatchesSearch(ticket, ticketSearchQuery);
+
+          let matchesFilter = true;
+
+          if (currentSidebarFilter === "active") {
+            matchesFilter =
+              ticket.status === "Open" ||
+              ticket.status === "In Progress";
+          } else if (currentSidebarFilter === "resolved") {
+            matchesFilter = ticket.status === "Resolved";
+          }
+
+          return matchesSearch && matchesFilter;
+        });
+
+        if (matchingTickets.length === 0) {
+          const emptyState = document.createElement("p");
+          emptyState.className = "ticket-search-empty";
+          emptyState.textContent = ticketSearchQuery
+            ? "No cases match your search."
+            : "No assigned cases are available.";
+          container.appendChild(emptyState);
+          return;
+        }
+
+        matchingTickets.forEach((ticket) => {
+          const article = document.createElement("article");
+          article.className = "admin-item-card";
+          article.style.cursor = "pointer";
+          article.dataset.ticketId = ticket.ticket_id;
+
+          if (ticket.ticket_id === selectedTicket) {
+            article.classList.add("selected-ticket");
+          }
+
+          article.addEventListener("click", () => {
+            openChat(ticket);
+          });
+
+          const top = document.createElement("div");
+          top.className = "admin-item-top";
+
+          const details = document.createElement("div");
+          const title = document.createElement("h3");
+          const preview = document.createElement("p");
+
+          title.textContent = ticket.ticket_id;
+          preview.textContent =
+            ticket.case_topic ||
+            ticket.user_message ||
+            "No topic selected";
+
+          details.append(title, preview);
+
+          const badge = document.createElement("span");
+          const isResolved = ticket.status === "Resolved";
+          const isInProgress = ticket.status === "In Progress";
+
+          badge.className = `admin-status-badge ${
+            isResolved
+              ? "resolved"
+              : isInProgress
+                ? "in-progress"
+                : "flagged"
+          }`;
+
+          badge.textContent = ticket.status;
+
+          top.append(details, badge);
+          article.appendChild(top);
+          container.appendChild(article);
+        });
+      }
+
+      function updateSelectedTicketHighlight() {
+        document
+          .querySelectorAll("#ticketList .admin-item-card")
+          .forEach((card) => {
+            card.classList.toggle(
+              "selected-ticket",
+              card.dataset.ticketId === selectedTicket
+            );
+          });
+      }
+
+      function updateIntroductionButton() {
+        const introductionButton =
+          document.getElementById("introductionBtn");
+
+        if (!selectedTicket) {
+          introductionButton.disabled = true;
+          return;
+        }
+
+        if (selectedTicketStatus === "Resolved") {
+          introductionButton.disabled = true;
+          introductionButton.textContent = "Introduction Sent";
+          return;
+        }
+
+        const wasSent =
+          introductionSentTickets.has(selectedTicket);
+
+        introductionButton.disabled = wasSent;
+        introductionButton.textContent = wasSent
+          ? "Introduction Sent"
+          : "Introduction Message";
       }
 
       async function loadTickets() {
+        if (ticketsLoading) {
+          return;
+        }
+
+        ticketsLoading = true;
+
         try {
-          const response = await fetch("/api/tickets");
+          const response = await fetch(
+            `/api/tickets?t=${Date.now()}`,
+            {
+              method: "GET",
+              cache: "no-store",
+            }
+          );
 
           if (!response.ok) {
             throw new Error(`Failed to load tickets: ${response.status}`);
           }
 
           const tickets = await response.json();
-          const container = document.getElementById("ticketList");
           const counters = document.querySelectorAll(
             ".admin-summary-card strong",
           );
 
-          container.innerHTML = "";
+          allTickets = Array.isArray(tickets) ? tickets : [];
 
-          counters[0].textContent = tickets.length;
-          counters[1].textContent = tickets.filter(
-            (ticket) => ticket.status === "Open",
+          const todayInSingapore = new Intl.DateTimeFormat(
+            "en-CA",
+            {
+              timeZone: "Asia/Singapore",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            }
+          ).format(new Date());
+
+          const activeCases = allTickets.filter(
+            (ticket) =>
+              ticket.status === "Open" ||
+              ticket.status === "In Progress"
           ).length;
 
-          tickets.forEach((ticket) => {
-            const article = document.createElement("article");
-            article.className = "admin-item-card";
-            article.style.cursor = "pointer";
+          const resolvedToday = allTickets.filter((ticket) => {
+            if (
+              ticket.status !== "Resolved" ||
+              !ticket.resolved_at
+            ) {
+              return false;
+            }
 
-            article.addEventListener("click", () => {
-              openChat(ticket.ticket_id, ticket.status);
-            });
+            const resolvedDate = parseApiTimestamp(
+              ticket.resolved_at
+            );
 
-            const top = document.createElement("div");
-            top.className = "admin-item-top";
+            if (!resolvedDate) {
+              return false;
+            }
 
-            const details = document.createElement("div");
-            const title = document.createElement("h3");
-            const preview = document.createElement("p");
+            const resolvedDateInSingapore =
+              new Intl.DateTimeFormat(
+                "en-CA",
+                {
+                  timeZone: "Asia/Singapore",
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                }
+              ).format(resolvedDate);
 
-            title.textContent = ticket.ticket_id;
-            preview.textContent = ticket.user_message || "No message preview";
+            return resolvedDateInSingapore === todayInSingapore;
+          }).length;
 
-            details.append(title, preview);
+          counters[0].textContent = allTickets.length;
+          counters[1].textContent = activeCases;
+          counters[2].textContent = resolvedToday;
 
-            const badge = document.createElement("span");
-            const isResolved = ticket.status === "Resolved";
-            badge.className = `admin-status-badge ${
-              isResolved ? "resolved" : "flagged"
-            }`;
-            badge.textContent = ticket.status;
-
-            top.append(details, badge);
-            article.appendChild(top);
-            container.appendChild(article);
-          });
+          renderTicketList(allTickets);
         } catch (error) {
           console.error("Unable to load tickets:", error);
+        } finally {
+          ticketsLoading = false;
         }
       }
 
       let conversationLoading = false;
 
-      async function openChat(ticketId) {
+      async function openChat(ticket) {
+        const ticketId = ticket.ticket_id;
+        const status = ticket.status;
+        const caseTopic =
+          ticket.case_topic || ticket.user_message;
+
         selectedTicket = ticketId;
+        selectedTicketStatus = status;
+        selectedTicketData = ticket;
+
+        document.getElementById("chatInput").value = "";
+        updateSelectedTicketHighlight();
 
         document.getElementById("chatTitle").textContent = ticketId;
 
-        // Stop polling the previously selected ticket
+        document.getElementById("chatTopic").textContent =
+          caseTopic
+            ? `Topic: ${caseTopic}`
+            : "Topic: Not specified";
+
+        startWaitingTimer(ticket);
+        setReplyControls(status);
+        setQuickResponseButtonsDisabled(status === "Resolved");
+        updateIntroductionButton();
+
+        if (status !== "Resolved") {
+          try {
+            const connectResponse = await fetch(
+              `/api/tickets/${encodeURIComponent(ticketId)}/connect`,
+              {
+                method: "POST"
+              }
+            );
+
+            if (!connectResponse.ok) {
+              throw new Error(
+                `Unable to connect to ticket: ${connectResponse.status}`
+              );
+            }
+
+            const connectResult = await connectResponse.json();
+
+            selectedTicketStatus =
+              connectResult.status || "In Progress";
+
+            selectedTicketData = {
+              ...selectedTicketData,
+              status: selectedTicketStatus,
+            };
+
+            startWaitingTimer(selectedTicketData);
+            setReplyControls(selectedTicketStatus);
+            updateIntroductionButton();
+
+            // Refresh cards so the badge changes to In Progress
+            await loadTickets();
+          } catch (error) {
+            console.error("Ticket connection error:", error);
+          }
+        }
+
         if (chatInterval) {
           clearInterval(chatInterval);
           chatInterval = null;
         }
 
-        // Load immediately
         await loadConversation();
 
-        // Then refresh every second
-        chatInterval = setInterval(() => {
-          loadConversation();
-        }, 1000);
+        chatInterval = setInterval(
+          loadConversation,
+          1000
+        );
       }
 
       async function loadConversation() {
@@ -394,6 +1151,25 @@
 
           const messages = await response.json();
 
+          const introductionAlreadySent = messages.some((msg) => {
+            const senderType =
+              String(msg.sender || "").toLowerCase();
+            const messageText =
+              String(msg.message || "");
+
+            return (
+              senderType === "cso" &&
+              messageText.startsWith("Hi! I am ") &&
+              messageText.includes(
+                "How may I help you today?"
+              )
+            );
+          });
+
+          if (introductionAlreadySent) {
+            introductionSentTickets.add(ticketBeingLoaded);
+          }
+
           // Do not display results from a previously selected ticket
           if (ticketBeingLoaded !== selectedTicket) {
             return;
@@ -412,15 +1188,40 @@
           messages.forEach((msg) => {
             const bubble = document.createElement("div");
 
-            bubble.className = msg.sender;
+            const senderType = String(msg.sender || "").toLowerCase();
+
+            let senderLabel;
+
+            if (senderType === "student" || senderType === "user") {
+              senderLabel = "USER";
+              bubble.className = "student";
+            } else if (senderType === "cso") {
+              senderLabel = "CSO";
+              bubble.className = "cso";
+            } else if (senderType === "system") {
+              senderLabel = "SYSTEM";
+              bubble.className = "system";
+            } else {
+              senderLabel = senderType.toUpperCase() || "UNKNOWN";
+              bubble.className = "student";
+            }
 
             const messageTime = formatSingaporeTime(msg.created_at);
 
-            bubble.innerHTML = `
-        <strong>${msg.sender.toUpperCase()}</strong><br>
-        <span>${msg.message}</span>
-        <div class="chat-message-time">${messageTime}</div>
-      `;
+            const senderElement = document.createElement("strong");
+            senderElement.textContent = senderLabel;
+
+            const messageElement = document.createElement("span");
+            messageElement.textContent = msg.message;
+
+            const timeElement = document.createElement("div");
+            timeElement.className = "chat-message-time";
+            timeElement.textContent = messageTime;
+
+            bubble.appendChild(senderElement);
+            bubble.appendChild(document.createElement("br"));
+            bubble.appendChild(messageElement);
+            bubble.appendChild(timeElement);
 
             chat.appendChild(bubble);
           });
@@ -432,11 +1233,98 @@
 
             chat.scrollTop = previousScrollTop + heightDifference;
           }
+
+          updateIntroductionButton();
         } catch (error) {
           console.error("Unable to refresh conversation:", error);
         } finally {
           conversationLoading = false;
         }
+      }
+
+      const quickResponses = {
+        passwordReset:
+          "I can help you with your login issue.\n\n" +
+          "Could you let me know:\n" +
+          "• Which portal you are trying to access\n" +
+          "• The exact error message shown\n" +
+          "• Whether you have already tried resetting your password\n\n" +
+          "Once I have these details, I can help identify the issue more quickly.",
+
+        courseRegistration:
+          "I can help investigate your course registration issue.\n\n" +
+          "Could you provide:\n" +
+          "• The course code or module name\n" +
+          "• The error message shown\n" +
+          "• Whether the registration period is currently open\n" +
+          "• A screenshot, if available\n\n" +
+          "I will review the details and advise you on the next step.",
+
+        tuitionFees:
+          "I can assist you with your tuition fee enquiry.\n\n" +
+          "Could you let me know whether your issue is related to:\n" +
+          "• An outstanding payment\n" +
+          "• Payment methods\n" +
+          "• Instalment plans\n" +
+          "• Refunds\n" +
+          "• Financial assistance\n\n" +
+          "Please also provide any relevant payment reference or error message.",
+
+        examResults:
+          "I understand that you are enquiring about your examination results.\n\n" +
+          "Could you provide:\n" +
+          "• The module name or code\n" +
+          "• Whether the results have already been released\n" +
+          "• The issue you are experiencing, such as missing results, an incorrect grade, or being unable to view the result\n\n" +
+          "I will help you investigate the matter.",
+
+        itSupport:
+          "I will help you troubleshoot the technical issue.\n\n" +
+          "Could you provide:\n" +
+          "• The device you are using\n" +
+          "• The browser or application name\n" +
+          "• The exact error message\n" +
+          "• A screenshot, if available\n" +
+          "• The steps you took before the issue occurred\n\n" +
+          "This information will help me identify the cause more efficiently.",
+
+        admissions:
+          "I would be happy to assist with your admissions enquiry.\n\n" +
+          "Could you let me know whether your question is related to:\n" +
+          "• Entry requirements\n" +
+          "• Application status\n" +
+          "• Supporting documents\n" +
+          "• Application deadlines\n" +
+          "• Scholarships or financial assistance\n\n" +
+          "Please provide any relevant application reference number so I can assist further."
+      };
+
+      function setQuickResponseButtonsDisabled(disabled) {
+        document
+          .querySelectorAll(".quick-response-btn")
+          .forEach((button) => {
+            button.disabled = disabled;
+          });
+      }
+
+      function insertQuickResponse(templateKey) {
+        if (!selectedTicket || selectedTicketStatus === "Resolved") {
+          return;
+        }
+
+        const template = quickResponses[templateKey];
+        const input = document.getElementById("chatInput");
+
+        if (!template || !input) {
+          return;
+        }
+
+        input.value = template;
+        input.focus();
+        input.setSelectionRange(
+          input.value.length,
+          input.value.length
+        );
       }
 
       async function sendReply() {
@@ -483,16 +1371,124 @@
         }
       }
 
-      async function markAsResolved() {
-        if (!selectedTicket || selectedTicketStatus === "Resolved") return;
+      async function sendIntroductionMessage() {
+        if (!selectedTicket || selectedTicketStatus === "Resolved") {
+          return;
+        }
 
-        const confirmed = confirm(`Mark ticket ${selectedTicket} as resolved?`);
+        const introductionButton =
+          document.getElementById("introductionBtn");
 
-        if (!confirmed) return;
+        const displayedName =
+          document.getElementById("displayName").textContent.trim();
 
-        const resolveButton = document.getElementById("resolveBtn");
-        resolveButton.disabled = true;
-        resolveButton.textContent = "Resolving...";
+        const csoName =
+          displayedName && displayedName !== "Loading..."
+            ? displayedName
+            : "your Customer Service Officer";
+
+        const introductionMessage =
+          `Hi! I am ${csoName}, your Customer Service Officer.\n\n` +
+          "How may I help you today?";
+
+        introductionButton.disabled = true;
+        introductionButton.textContent = "Sending...";
+
+        try {
+          const response = await fetch("/api/chat/send", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              ticketId: selectedTicket,
+              sender: "cso",
+              message: introductionMessage,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(
+              `Unable to send introduction: ${response.status}`
+            );
+          }
+
+          introductionSentTickets.add(selectedTicket);
+          await loadConversation();
+          updateIntroductionButton();
+        } catch (error) {
+          console.error("Introduction message error:", error);
+          alert("Unable to send the introduction. Please try again.");
+          introductionButton.disabled = false;
+          introductionButton.textContent = "Introduction";
+        }
+      }
+
+      async function sendStandardResolutionMessage() {
+        if (!selectedTicket || selectedTicketStatus === "Resolved") {
+          return;
+        }
+
+        const resolutionButton =
+          document.getElementById("resolutionMessageBtn");
+
+        const standardMessage =
+          "Your issue has been reviewed and addressed. " +
+          "Please check that everything is working as expected.\n\n" +
+          "This support ticket will be closing soon. " +  
+          "Do let us know if you require any further assistance!";
+
+        resolutionButton.disabled = true;
+        resolutionButton.textContent = "Sending...";
+
+        try {
+          const response = await fetch("/api/chat/send", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              ticketId: selectedTicket,
+              sender: "cso",
+              message: standardMessage,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(
+              `Unable to send resolution message: ${response.status}`
+            );
+          }
+
+          await loadConversation();
+
+          resolutionButton.textContent = "Resolution Sent";
+        } catch (error) {
+          console.error("Resolution message error:", error);
+          alert("Unable to send the resolution message. Please try again.");
+          resolutionButton.disabled = false;
+          resolutionButton.textContent = "Final Resolution Message";
+        }
+      }
+
+      async function closeTicket() {
+        if (!selectedTicket || selectedTicketStatus === "Resolved") {
+          return;
+        }
+
+        const confirmed = confirm(
+          `Close ticket ${selectedTicket}?`
+        );
+
+        if (!confirmed) {
+          return;
+        }
+
+        const closeButton =
+          document.getElementById("closeTicketBtn");
+
+        closeButton.disabled = true;
+        closeButton.textContent = "Closing...";
 
         try {
           const response = await fetch(
@@ -502,7 +1498,7 @@
               headers: {
                 "Content-Type": "application/json",
               },
-            },
+            }
           );
 
           let result = {};
@@ -512,28 +1508,70 @@
             try {
               result = JSON.parse(responseText);
             } catch {
-              result = { message: responseText };
+              result = {
+                error: responseText,
+              };
             }
           }
 
           if (!response.ok) {
-            throw new Error(result.error || "Unable to resolve ticket");
+            throw new Error(
+              result.error || "Unable to close ticket."
+            );
           }
 
           selectedTicketStatus = "Resolved";
+
+          const resolvedTicket = result.ticket || {};
+
+          selectedTicketData = {
+            ...selectedTicketData,
+            ...resolvedTicket,
+            status: "Resolved",
+            resolved_at:
+              resolvedTicket.resolved_at ||
+              result.resolved_at ||
+              new Date().toISOString(),
+          };
+
+          startWaitingTimer(selectedTicketData);
           setReplyControls("Resolved");
 
-          // Reload cards so the Open badge immediately becomes purple Resolved.
           await loadTickets();
         } catch (error) {
-          console.error("Resolve ticket error:", error);
+          console.error("Close ticket error:", error);
           alert(error.message);
-          resolveButton.disabled = false;
-          resolveButton.textContent = "Mark as Resolved";
+          closeButton.disabled = false;
+          closeButton.textContent = "Close Ticket";
         }
       }
 
+      const ticketSearchInput =
+        document.getElementById("ticketSearchInput");
+
+      ticketSearchInput.addEventListener("input", (event) => {
+        ticketSearchQuery = event.target.value;
+        renderTicketList(allTickets);
+      });
+
+      document.querySelectorAll(".admin-sidebar-nav a[data-filter]").forEach((link)=>{
+        link.addEventListener("click",(e)=>{
+          e.preventDefault();
+
+          document.querySelectorAll(".admin-sidebar-nav a[data-filter]").forEach(a=>a.classList.remove("active"));
+          link.classList.add("active");
+
+          currentSidebarFilter = link.dataset.filter;
+          renderTicketList(allTickets);
+        });
+      });
+
+      setQuickResponseButtonsDisabled(true);
+
       loadTickets();
+
+      // Automatically check for new assigned cases every 3 seconds.
+      setInterval(loadTickets, 3000);
     </script>
   </body>
 </html>

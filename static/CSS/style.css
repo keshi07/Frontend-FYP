@@ -945,8 +945,13 @@ img {
 }
 
 .message.user {
-  background: var(--primary);
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
+  background: #0d4f8b;
   color: #ffffff;
+  border-radius: 14px 14px 4px 14px;
+  white-space: pre-line;
 }
 
 .message-time {
@@ -963,12 +968,16 @@ img {
 }
 
 .message.cso {
+  display: inline-block;
+  width: fit-content;
   background: #e9eef5;
   color: #111827;
   padding: 10px 14px;
   border-radius: 14px 14px 14px 4px;
   max-width: 75%;
   word-wrap: break-word;
+  text-align: left;
+  white-space: pre-line;
 }
 
 .message-time.cso {
@@ -2610,17 +2619,4 @@ body.dark-mode .bot-details-btn {
   background: #1f2937;
   border-color: #334155;
   color: #f8fafc;
-}
-
-body.dark-mode .quick-reply-btn:hover {
-  background: #273449;
-}
-
-body.dark-mode .bot-section-title {
-  color: #f8fafc;
-}
-
-body.dark-mode .bot-link-chip {
-  background: #1e3a8a;
-  color: #dbeafe;
 }

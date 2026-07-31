@@ -1,5 +1,5 @@
 let sessionId = crypto.randomUUID();
-
+let awaitingLiveSupportTopic = false;
 let activeTicketId = null;
 let lastMessageId = 0;
 let liveChatInterval = null;
@@ -164,11 +164,10 @@ function addMessage(text, sender = "bot") {
 
   removeTypingIndicator();
 
-  // Never show the end indicator during live CSO replies
-  if (sender === "cso") {
+  if (sender === "cso" || sender === "system") {
     removeEndIndicator();
   }
-  
+
   const wrapper = document.createElement("div");
   wrapper.className = `message-wrapper ${sender}`;
 
@@ -363,8 +362,11 @@ function renderQuickReplies(replies = []) {
 }
 
 function clearQuickReplies() {
-  if (!quickReplies) return;
-  quickReplies.innerHTML = "";
+  if (!chatBody) return;
+
+  chatBody
+    .querySelectorAll(".quick-replies-wrapper")
+    .forEach((wrapper) => wrapper.remove());
 }
 
 function initializeChat() {
@@ -381,9 +383,19 @@ function initializeChat() {
 
 function restartConversation() {
   sessionId = crypto.randomUUID();
+
   sentMessageHistory = [];
   historyIndex = 0;
   responseCounter = 0;
+
+  awaitingLiveSupportTopic = false;
+  activeTicketId = null;
+  lastMessageId = 0;
+
+  if (liveChatInterval) {
+    clearInterval(liveChatInterval);
+    liveChatInterval = null;
+  }
 
   removeTypingIndicator();
   removeEndIndicator();
@@ -401,6 +413,105 @@ function restartConversation() {
   }
 
   chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+/* =========================
+   Sensitive Data Masking
+========================= */
+
+function maskNamePart(namePart) {
+  if (!namePart) return "";
+
+  if (namePart.length === 1) {
+    return "*";
+  }
+
+  return namePart[0] + "*".repeat(namePart.length - 1);
+}
+
+function maskSensitiveData(originalText) {
+  let maskedText = String(originalText || "");
+  const detectedTypes = new Set();
+
+  // Singapore NRIC and FIN:
+  // Examples: S1234567D, T1234567A, F1234567N, G1234567X
+  maskedText = maskedText.replace(
+    /\b([STFGM])(\d{6})(\d)([A-Z])\b/gi,
+    (match, prefix, middleDigits, finalDigit, suffix) => {
+      detectedTypes.add("identification number");
+
+      return (
+        prefix.toUpperCase() +
+        "******" +
+        finalDigit +
+        suffix.toUpperCase()
+      );
+    }
+  );
+
+  // Email addresses
+  maskedText = maskedText.replace(
+    /\b([A-Z0-9._%+-]+)@([A-Z0-9.-]+\.[A-Z]{2,})\b/gi,
+    (match, localPart, domain) => {
+      detectedTypes.add("email address");
+
+      const firstCharacter = localPart.charAt(0);
+
+      return (
+        firstCharacter +
+        "*".repeat(Math.max(3, localPart.length - 1)) +
+        "@" +
+        domain
+      );
+    }
+  );
+
+  // Singapore mobile or landline numbers
+  // Optional +65 prefix and optional spaces/hyphens
+  maskedText = maskedText.replace(
+    /\b(?:\+65[\s-]?)?([3689]\d{1})[\s-]?(\d{4})[\s-]?(\d{2})\b/g,
+    (match, firstTwoDigits, middleDigits, finalTwoDigits) => {
+      detectedTypes.add("phone number");
+
+      return `${firstTwoDigits}****${finalTwoDigits}`;
+    }
+  );
+
+  // Names explicitly introduced using "my name is"
+  maskedText = maskedText.replace(
+    /\b(my name is\s+)([A-Za-z][A-Za-z'-]*(?:\s+[A-Za-z][A-Za-z'-]*){0,3})/gi,
+    (match, introduction, fullName) => {
+      detectedTypes.add("name");
+
+      const maskedName = fullName
+        .split(/\s+/)
+        .map(maskNamePart)
+        .join(" ");
+
+      return introduction + maskedName;
+    }
+  );
+
+  return {
+    originalText: String(originalText || ""),
+    maskedText,
+    containsSensitiveData: detectedTypes.size > 0,
+    detectedTypes: Array.from(detectedTypes),
+  };
+}
+
+function showSensitiveDataNotice(detectedTypes) {
+  const types = Array.isArray(detectedTypes)
+    ? detectedTypes.join(", ")
+    : "personal information";
+
+  addMessage(
+    `🔒 Sensitive data detected: ${types}.\n\n` +
+    "Your personal information has been masked in your chat view. " +
+    "The original information is only sent to the Customer Service Officer " +
+    "when you are using live support.",
+    "system"
+  );
 }
 
 /* =========================
@@ -448,9 +559,10 @@ async function sendUserMessage(text, isIntentSelection = false, displayText = nu
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: text,
+        message: displayText || text,
         sessionId: sessionId,
-        isIntentSelection: isIntentSelection
+        isIntentSelection: isIntentSelection,
+        isLiveSupportTopic: awaitingLiveSupportTopic
       })
     });
 
@@ -465,20 +577,30 @@ async function sendUserMessage(text, isIntentSelection = false, displayText = nu
 
     addStructuredMessage(data);
 
-    if (data.intent === "LiveAgentEscalation") {
-
-      activeTicketId = data.ticketId;
-
-      startLiveChat();
-
+    if (data.intent === "LiveAgentTopicSelection") {
+      awaitingLiveSupportTopic = true;
     }
 
-    const repliesToShow =
-      Array.isArray(data.quickReplies) && data.quickReplies.length > 0
-        ? data.quickReplies
-        : initialQuickReplies;
+    if (
+      data.intent === "LiveAgentEscalation" &&
+      data.ticketId
+    ) {
+      awaitingLiveSupportTopic = false;
+      clearQuickReplies();
 
-    renderQuickReplies(repliesToShow);
+      activeTicketId = data.ticketId;
+      lastMessageId = 0;
+      startLiveChat();
+    }
+
+    if (
+      Array.isArray(data.quickReplies) &&
+      data.quickReplies.length > 0
+    ) {
+      renderQuickReplies(data.quickReplies);
+    } else {
+      clearQuickReplies();
+    }
 
   } catch (err) {
 
@@ -494,50 +616,81 @@ async function sendUserMessage(text, isIntentSelection = false, displayText = nu
 }
 
 async function loadLiveMessages() {
+  if (!activeTicketId) return;
 
-    if (!activeTicketId) return;
+  try {
+    const response = await fetch(
+      `/api/chat/${encodeURIComponent(activeTicketId)}?t=${Date.now()}`,
+      {
+        method: "GET",
+        cache: "no-store"
+      }
+    );
 
-    const response = await fetch(`/api/chat/${activeTicketId}`);
+    if (!response.ok) {
+      throw new Error(
+        `Unable to load live messages: ${response.status}`
+      );
+    }
 
     const messages = await response.json();
 
-    messages.forEach(msg => {
+    messages.forEach((msg) => {
+      if (msg.id <= lastMessageId) return;
 
-        if (msg.id <= lastMessageId) return;
+      lastMessageId = msg.id;
 
-        lastMessageId = msg.id;
-
-        if (msg.sender === "cso") {
-
-            addMessage(msg.message, "cso");
-
-        }
-
+      if (msg.sender === "cso") {
+        addMessage(msg.message, "cso");
+      } else if (msg.sender === "system") {
+        addMessage(msg.message, "system");
+      }
     });
-
+  } catch (error) {
+    console.error("Live-message polling error:", error);
+  }
 }
 
 function startLiveChat() {
+  if (liveChatInterval) {
+    clearInterval(liveChatInterval);
+  }
 
-    if (liveChatInterval)
+  loadLiveMessages();
 
-        clearInterval(liveChatInterval);
-
-    liveChatInterval = setInterval(loadLiveMessages,1000);
-
+  liveChatInterval = setInterval(
+    loadLiveMessages,
+    1000
+  );
 }
 
 async function sendMessage() {
   if (!chatInput) return;
 
-  const text = chatInput.value.trim();
-  if (!text) return;
+  const originalText = chatInput.value.trim();
 
-  storeSentMessage(text);
+  if (!originalText) {
+    return;
+  }
+
+  const privacyResult = maskSensitiveData(originalText);
+
+  storeSentMessage(originalText);
+
   chatInput.value = "";
   historyIndex = sentMessageHistory.length;
 
-  await sendUserMessage(text);
+  await sendUserMessage(
+    privacyResult.originalText,
+    false,
+    privacyResult.maskedText
+  );
+
+  if (privacyResult.containsSensitiveData) {
+    showSensitiveDataNotice(
+      privacyResult.detectedTypes
+    );
+  }
 }
 
 /* =========================

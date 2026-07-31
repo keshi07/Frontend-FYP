@@ -4,6 +4,7 @@ from google.cloud import dialogflow_v2 as dialogflow
 from google.protobuf import field_mask_pb2
 import os
 import requests
+from datetime import datetime, timezone
 
 app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -14,6 +15,16 @@ supabase_key = ("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 
 PROJECT_ID = "universitychatbot-ejvs"
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "universitychatbot-ejvs-9bb89b9138f6.json"
+
+LIVE_SUPPORT_TOPICS = [
+    "Account or Login",
+    "Wi-Fi or IT Issue",
+    "Student Portal",
+    "Student Card",
+    "Fees or Payments",
+    "Academic or Enrolment",
+    "Other"
+]
 
 
 @app.route("/")
@@ -108,9 +119,52 @@ def get_user_profile(user_id):
     return None
 
 
+def get_live_support_queue_size():
+    """Count tickets that are currently waiting or being handled."""
 
-def create_support_ticket(session_id, user_message):
+    url = f"{supabase_url}/rest/v1/support_tickets"
+
+    response = requests.get(
+        url,
+        headers=supabase_headers({"Prefer": "count=exact"}),
+        params={
+            "status": "in.(Open,In Progress)",
+            "select": "id"
+        }
+    )
+
+    response.raise_for_status()
+
+    content_range = response.headers.get("Content-Range", "")
+
+    if "/" in content_range:
+        total = content_range.rsplit("/", 1)[-1]
+
+        if total.isdigit():
+            return int(total)
+
+    return len(response.json())
+
+
+def estimate_live_support_wait(queue_position):
+    """
+    Estimate the waiting time based on approximately
+    three minutes per ticket.
+    """
+
+    minimum = max(1, (queue_position - 1) * 3)
+    maximum = max(3, queue_position * 3)
+
+    return minimum, maximum
+
+def create_support_ticket(session_id, user_message, case_topic):
     import uuid
+
+    queue_position = get_live_support_queue_size() + 1
+
+    estimated_wait_min, estimated_wait_max = (
+        estimate_live_support_wait(queue_position)
+    )
 
     ticket_id = f"TKT-{str(uuid.uuid4())[:8]}"
 
@@ -120,18 +174,26 @@ def create_support_ticket(session_id, user_message):
         "ticket_id": ticket_id,
         "session_id": session_id,
         "user_message": user_message,
+        "case_topic": case_topic,
         "status": "Open"
     }
 
     response = requests.post(
         url,
-        headers=supabase_headers({"Prefer": "return=representation"}),
+        headers=supabase_headers({
+            "Prefer": "return=representation"
+        }),
         json=payload
     )
 
     response.raise_for_status()
 
-    return ticket_id
+    return {
+        "ticket_id": ticket_id,
+        "queue_position": queue_position,
+        "estimated_wait_min": estimated_wait_min,
+        "estimated_wait_max": estimated_wait_max
+    }
 
 def get_quick_replies(intent_name):
     quick_reply_map = {
@@ -288,16 +350,18 @@ def get_related_topic_objects(intent_names):
 
 @app.route("/api/chat", methods=["POST"])
 def chat():
-    data = request.get_json()
+    data = request.get_json() or {}
     user_text = data.get("message", "").strip()
     session_id = data.get("sessionId", "").strip()
     is_intent_selection = data.get("isIntentSelection", False)
+    is_live_support_topic = data.get("isLiveSupportTopic", False)
 
     if not user_text:
         return jsonify({"reply": "Please type a message."}), 400
 
     if not session_id:
         return jsonify({"reply": "Missing session ID."}), 400
+
     escalation_phrases = [
         "talk to live agent",
         "talk to human",
@@ -309,29 +373,85 @@ def chat():
         "human"
     ]
 
-    if user_text.lower() in escalation_phrases:
-
-        ticket_id = create_support_ticket(
-            session_id,
-            user_text
-        )
-
-        return jsonify({
-            "reply": f"Your support ticket {ticket_id} has been created and transferred to a Customer Service Officer.",
-            "summary": f"Ticket {ticket_id} created successfully.",
-            "details": "A CSO will review your request and respond shortly.",
-            "steps": [],
-            "relatedTopics": [],
-            "links": [],
-            "quickReplies": [],
-            "intent": "LiveAgentEscalation",
-            "displayName": "Live Agent Escalation",
-            "sessionId": session_id,
-            "ticketId": ticket_id
-        })
-
-
     try:
+        # Stage 1: Ask the user to choose a support topic.
+        if user_text.lower() in escalation_phrases:
+            return jsonify({
+                "reply": "Please select the topic that best describes your issue.",
+                "summary": "What do you need help with?",
+                "details": (
+                    "Select one of the topics below so the Customer Service "
+                    "Officer can understand your case more quickly."
+                ),
+                "steps": [],
+                "relatedTopics": [],
+                "links": [],
+                "quickReplies": LIVE_SUPPORT_TOPICS,
+                "intent": "LiveAgentTopicSelection",
+                "displayName": "Select Support Topic",
+                "sessionId": session_id
+            }), 200
+
+        # Stage 2: Create the ticket only after the user selects a topic.
+        if is_live_support_topic:
+            selected_topic = user_text
+
+            if selected_topic not in LIVE_SUPPORT_TOPICS:
+                return jsonify({
+                    "reply": "Please select a valid support topic.",
+                    "summary": "Invalid support topic",
+                    "details": "Choose one of the available support-topic buttons.",
+                    "steps": [],
+                    "relatedTopics": [],
+                    "links": [],
+                    "quickReplies": LIVE_SUPPORT_TOPICS,
+                    "intent": "LiveAgentTopicSelection",
+                    "displayName": "Select Support Topic",
+                    "sessionId": session_id
+                }), 400
+
+            ticket = create_support_ticket(
+                session_id=session_id,
+                user_message=selected_topic,
+                case_topic=selected_topic
+            )
+
+            ticket_id = ticket["ticket_id"]
+            wait_min = ticket["estimated_wait_min"]
+            wait_max = ticket["estimated_wait_max"]
+
+            return jsonify({
+                "reply": (
+                    f"Your support ticket {ticket_id} has been created. "
+                    f"Your estimated wait time is {wait_min} – {wait_max} minutes."
+                ),
+                "summary": (
+                    f"Ticket number: {ticket_id}\n\n"
+                    f"You are now in the live-support queue.\n"
+                    f"Estimated wait: {wait_min}–{wait_max} minutes."
+                ),
+                "details": (
+                    f"Selected topic: {selected_topic}. "
+                    "Please keep this chat window open. "
+                    "You will receive a notification when the live chat "
+                    "connection has been established."
+                ),
+                "steps": [],
+                "relatedTopics": [],
+                "links": [],
+                "quickReplies": [],
+                "intent": "LiveAgentEscalation",
+                "displayName": "Live Agent Escalation",
+                "sessionId": session_id,
+                "ticketId": ticket_id,
+                "caseTopic": selected_topic,
+                "queuePosition": ticket["queue_position"],
+                "estimatedWaitMinutes": {
+                    "minimum": wait_min,
+                    "maximum": wait_max
+                }
+            }), 201
+
         if is_intent_selection:
             intent_name = user_text
             faq = get_faq_content(intent_name)
@@ -345,7 +465,12 @@ def chat():
             faq = get_faq_content(intent_name)
 
         if faq:
-            summary = faq.get("summary") or faq.get("answer") or df_result["reply"] or "Sorry, I couldn't find a matching answer."
+            summary = (
+                faq.get("summary")
+                or faq.get("answer")
+                or df_result["reply"]
+                or "Sorry, I couldn't find a matching answer."
+            )
             details = faq.get("details") or ""
             steps = faq.get("steps") or []
             related_topics = faq.get("related_topics") or []
@@ -366,7 +491,10 @@ def chat():
                 "sessionId": session_id
             })
 
-        fallback_reply = df_result["reply"] or "Sorry, I couldn't find a matching answer."
+        fallback_reply = (
+            df_result["reply"]
+            or "Sorry, I couldn't find a matching answer."
+        )
 
         fallback_quick_replies = get_quick_replies(intent_name) or [
             "Password Reset",
@@ -392,7 +520,10 @@ def chat():
     except Exception as e:
         print("Chat error:", str(e))
         return jsonify({
-            "reply": "Sorry, the chatbot is temporarily unavailable. Please try again later."
+            "reply": (
+                "Sorry, the chatbot is temporarily unavailable. "
+                "Please try again later."
+            )
         }), 500
 
 
@@ -763,6 +894,92 @@ def send_chat_message():
 
     return jsonify(response.json()), 201
 
+
+@app.route("/api/tickets/<ticket_id>/connect", methods=["POST"])
+def connect_to_ticket(ticket_id):
+    """Mark an open ticket as in progress and notify the student."""
+
+    tickets_url = f"{supabase_url}/rest/v1/support_tickets"
+
+    ticket_response = requests.get(
+        tickets_url,
+        headers=supabase_headers(),
+        params={
+            "ticket_id": f"eq.{ticket_id}",
+            "select": "ticket_id,status",
+            "limit": 1
+        }
+    )
+
+    ticket_response.raise_for_status()
+    rows = ticket_response.json()
+
+    if not rows:
+        return jsonify({"error": "Ticket not found."}), 404
+
+    current_status = rows[0].get("status")
+
+    if current_status == "Resolved":
+        return jsonify({
+            "status": "Resolved",
+            "connected": False
+        }), 200
+
+    if current_status == "Open":
+        update_response = requests.patch(
+            tickets_url,
+            headers=supabase_headers({
+                "Prefer": "return=representation"
+            }),
+            params={
+                "ticket_id": f"eq.{ticket_id}"
+            },
+            json={
+                "status": "In Progress"
+            }
+        )
+
+        update_response.raise_for_status()
+
+    messages_url = f"{supabase_url}/rest/v1/chat_messages"
+    connected_message = (
+        "The live chat connection has been established."
+    )
+
+    existing_response = requests.get(
+        messages_url,
+        headers=supabase_headers(),
+        params={
+            "ticket_id": f"eq.{ticket_id}",
+            "sender": "eq.system",
+            "message": f"eq.{connected_message}",
+            "select": "id",
+            "limit": 1
+        }
+    )
+
+    existing_response.raise_for_status()
+
+    if not existing_response.json():
+        message_response = requests.post(
+            messages_url,
+            headers=supabase_headers({
+                "Prefer": "return=representation"
+            }),
+            json={
+                "ticket_id": ticket_id,
+                "sender": "system",
+                "message": connected_message
+            }
+        )
+
+        message_response.raise_for_status()
+
+    return jsonify({
+        "status": "In Progress",
+        "connected": True
+    }), 200
+
 @app.route("/api/tickets/<ticket_id>/reply", methods=["PUT"])
 def reply_ticket(ticket_id):
 
@@ -789,7 +1006,218 @@ def reply_ticket(ticket_id):
         "message": "Ticket updated successfully"
     })
 
+@app.route(
+    "/api/tickets/<ticket_id>/resolve-with-message",
+    methods=["POST"]
+)
+def resolve_ticket_with_message(ticket_id):
+    """Send a final CSO message and resolve the ticket in one action."""
 
+    data = request.get_json(silent=True) or {}
+    resolution_message = str(data.get("message", "")).strip()
+
+    if not resolution_message:
+        return jsonify({
+            "error": "A final resolution message is required."
+        }), 400
+
+    tickets_url = f"{supabase_url}/rest/v1/support_tickets"
+    messages_url = f"{supabase_url}/rest/v1/chat_messages"
+
+    try:
+        ticket_response = requests.get(
+            tickets_url,
+            headers=supabase_headers(),
+            params={
+                "ticket_id": f"eq.{ticket_id}",
+                "select": "ticket_id,status",
+                "limit": 1
+            }
+        )
+
+        ticket_response.raise_for_status()
+        ticket_rows = ticket_response.json()
+
+        if not ticket_rows:
+            return jsonify({
+                "error": "Ticket not found."
+            }), 404
+
+        if ticket_rows[0].get("status") == "Resolved":
+            return jsonify({
+                "error": "This ticket has already been resolved."
+            }), 409
+
+        message_response = requests.post(
+            messages_url,
+            headers=supabase_headers({
+                "Prefer": "return=representation"
+            }),
+            json={
+                "ticket_id": ticket_id,
+                "sender": "cso",
+                "message": resolution_message
+            }
+        )
+
+        message_response.raise_for_status()
+        inserted_messages = message_response.json()
+
+        resolved_at = datetime.now(timezone.utc).isoformat()
+
+        update_response = requests.patch(
+            tickets_url,
+            headers=supabase_headers({
+                "Prefer": "return=representation"
+            }),
+            params={
+                "ticket_id": f"eq.{ticket_id}"
+            },
+            json={
+                "status": "Resolved",
+                "cso_response": resolution_message,
+                "resolved_at": resolved_at
+            }
+        )
+
+        update_response.raise_for_status()
+        updated_rows = update_response.json()
+
+        if not updated_rows:
+            return jsonify({
+                "error": "The ticket could not be updated."
+            }), 500
+
+        return jsonify({
+            "message": (
+                "Resolution message sent and ticket closed successfully."
+            ),
+            "ticket": updated_rows[0],
+            "chatMessage": (
+                inserted_messages[0]
+                if inserted_messages
+                else None
+            ),
+            "resolved_at": resolved_at
+        }), 200
+
+    except requests.RequestException as error:
+        print("Resolve-with-message error:", str(error))
+
+        response_text = ""
+
+        if error.response is not None:
+            response_text = error.response.text
+
+        return jsonify({
+            "error": (
+                response_text
+                or "Unable to send the resolution message."
+            )
+        }), 500
+
+
+@app.route("/api/tickets/<ticket_id>/resolve", methods=["PATCH"])
+def resolve_ticket(ticket_id):
+    """Close a ticket and notify the user in the live chat."""
+
+    tickets_url = f"{supabase_url}/rest/v1/support_tickets"
+    messages_url = f"{supabase_url}/rest/v1/chat_messages"
+
+    try:
+        ticket_response = requests.get(
+            tickets_url,
+            headers=supabase_headers(),
+            params={
+                "ticket_id": f"eq.{ticket_id}",
+                "select": "ticket_id,status",
+                "limit": 1
+            }
+        )
+
+        ticket_response.raise_for_status()
+        ticket_rows = ticket_response.json()
+
+        if not ticket_rows:
+            return jsonify({
+                "error": "Ticket not found."
+            }), 404
+
+        if ticket_rows[0].get("status") == "Resolved":
+            return jsonify({
+                "error": "This ticket has already been closed."
+            }), 409
+
+        resolved_at = datetime.now(timezone.utc).isoformat()
+
+        update_response = requests.patch(
+            tickets_url,
+            headers=supabase_headers({
+                "Prefer": "return=representation"
+            }),
+            params={
+                "ticket_id": f"eq.{ticket_id}"
+            },
+            json={
+                "status": "Resolved",
+                "resolved_at": resolved_at
+            }
+        )
+
+        update_response.raise_for_status()
+        updated_rows = update_response.json()
+
+        if not updated_rows:
+            return jsonify({
+                "error": "Ticket could not be closed."
+            }), 500
+
+        closure_message = (
+            "This support ticket has been closed by the Customer Service "
+            "Officer. Thank you for contacting UniHelp. If you still require "
+            "assistance, please start a new live-support request."
+        )
+
+        message_response = requests.post(
+            messages_url,
+            headers=supabase_headers({
+                "Prefer": "return=representation"
+            }),
+            json={
+                "ticket_id": ticket_id,
+                "sender": "system",
+                "message": closure_message
+            }
+        )
+
+        message_response.raise_for_status()
+        inserted_messages = message_response.json()
+
+        return jsonify({
+            "message": "Ticket closed successfully.",
+            "ticket": updated_rows[0],
+            "closureMessage": (
+                inserted_messages[0]
+                if inserted_messages
+                else None
+            ),
+            "resolved_at": resolved_at
+        }), 200
+
+    except requests.RequestException as error:
+        print("Close-ticket error:", str(error))
+
+        response_text = ""
+
+        if error.response is not None:
+            response_text = error.response.text
+
+        return jsonify({
+            "error": (
+                response_text
+                or "Unable to close the ticket."
+            )
+        }), 500
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000, use_reloader=True)
